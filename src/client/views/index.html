@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Christian Westpfahl">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Travel App</title>
+</head>
+
+<body class="home-page-grid">
+  <header class="main-header">
+    <h1 class="uk-text-center">Travel App</h1>
+  </header>
+  <main class="content">
+    <div id="app" class="uk-panel-box">
+      <div class="holder country uk-margin">
+        <label for="country">Select country</label>
+        <select name="country" id="country" class="uk-select" onchange="Client.inputCountry()">
+          <option value="">&mdash; USA is default, or choose your country &mdash;</option>
+        </select>
+      </div>
+      <div class="holder city uk-margin required">
+        <!-- Todo: required with error if nothing is selected -->
+        <label for="city">Enter the city you want to visit</label>
+        <input class="uk-input" type="text" id="city" />
+        <!-- <label for="zip">Enter numerical zip code</label>
+        <input class="uk-input" type="text" id="zip" placeholder="enter zip code here" type="number"> -->
+      </div>
+      <!-- Todo: include datepicker, see https://bootstrap-datepicker.readthedocs.io/en/latest/ -->
+      <div class="holder date uk-margin">
+        <label for="date">Enter your travel date</label>
+        <input class="uk-input" type="date" id="trip-date" name="trip-date" value="2020-03-01" min="" max="">
+      </div>
+      <div class="holder feel">
+        
+        <button class="uk-button uk-button-default uk-button-primary uk-margin-top" id="generate" type="submit"
+          onclick="Client.submitInfo()">Generate</button>
+      </div>
+      <div class="holder entry" id="journal">
+        <div id="entry-holder">
+          <div id="date" class="uk-text-center"></div>
+          <h3 id="name" class="uk-heading-line uk-text-center"></h3>
+          <div id="weather-info" class="uk-text-center">
+            <span id="icon"></span>
+            <span id="temp"></span>
+          </div>
+          <div id="content"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+
+</html>

@@ -1,0 +1,48 @@
+/* Created with https://google-webfonts-helper.herokuapp.com */
+
+@font-face {
+     font-family: "Cabin";
+     font-style: normal;
+     font-weight: 400;
+     src: url("../media/fonts/cabin-v18-latin-regular.eot"); /* IE9 Compat Modes */
+     src: local(""), url("../media/fonts/cabin-v18-latin-regular.eot?#iefix") format("embedded-opentype"),
+          /* IE6-IE8 */ url("../media/fonts/cabin-v18-latin-regular.woff2") format("woff2"),
+          /* Super Modern Browsers */ url("../media/fonts/cabin-v18-latin-regular.woff") format("woff"),
+          /* Modern Browsers */ url("../media/fonts/cabin-v18-latin-regular.ttf") format("truetype"),
+          /* Safari, Android, iOS */ url("../media/fonts/cabin-v18-latin-regular.svg#Cabin") format("svg"); /* Legacy iOS */
+}
+
+@font-face {
+     font-family: "Cabin";
+     font-style: normal;
+     font-weight: 700;
+     src: url("../media/fonts/cabin-v18-latin-700.eot"); /* IE9 Compat Modes */
+     src: local(""), url("../media/fonts/cabin-v18-latin-700.eot?#iefix") format("embedded-opentype"),
+          /* IE6-IE8 */ url("../media/fonts/cabin-v18-latin-700.woff2") format("woff2"),
+          /* Super Modern Browsers */ url("../media/fonts/cabin-v18-latin-700.woff") format("woff"),
+          /* Modern Browsers */ url("../media/fonts/cabin-v18-latin-700.ttf") format("truetype"),
+          /* Safari, Android, iOS */ url("../media/fonts/cabin-v18-latin-700.svg#Cabin") format("svg"); /* Legacy iOS */
+}
+
+@font-face {
+     font-family: "Lato";
+     font-style: normal;
+     font-weight: 700;
+     src: url("../media/fonts/lato-v17-latin-700.eot"); /* IE9 Compat Modes */
+     src: local(""), url("../media/fonts/lato-v17-latin-700.eot?#iefix") format("embedded-opentype"),
+          /* IE6-IE8 */ url("../media/fonts/lato-v17-latin-700.woff2") format("woff2"),
+          /* Super Modern Browsers */ url("../media/fonts/lato-v17-latin-700.woff") format("woff"),
+          /* Modern Browsers */ url("../media/fonts/lato-v17-latin-700.ttf") format("truetype"),
+          /* Safari, Android, iOS */ url("../media/fonts/lato-v17-latin-700.svg#Lato") format("svg"); /* Legacy iOS */
+}
+
+@font-face {
+     font-family: WeatherIcons;
+     src: url("../media/fonts/WeatherIcons.eot");
+     src: url("../media/fonts/WeatherIcons.eot?#iefix") format("embedded-opentype"),
+          url("../media/fonts/WeatherIcons.woff2") format("woff2"), url("../media/fonts/WeatherIcons.woff") format("woff"),
+          url("../media/fonts/WeatherIcons.ttf") format("truetype"),
+          url("../media/fonts/WeatherIcons.svg#WeatherIcons") format("svg");
+     font-style: normal;
+     font-weight: 400;
+}

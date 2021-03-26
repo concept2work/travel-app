@@ -1,0 +1,126 @@
+@import "variables";
+@import "fonts";
+@import "~bootstrap/scss/bootstrap";
+@import "~uikit/src/scss/variables.scss";
+@import "~uikit/src/scss/mixins.scss";
+@import "~uikit/src/scss/uikit.scss";
+@import "open-weather-icons";
+
+html {
+    font-size: 14px;
+}
+
+body {
+    font-family: "Cabin", sans-serif;
+    background-color: var(--white);
+    color: var(--light-black);
+    font-weight: 400;
+    margin: 0;
+    font-size: var(--main-font-size);
+    line-height: 1.5;
+    hyphens: auto;
+}
+
+textarea {
+    font-family: "Cabin", sans-serif;
+}
+
+.home-page-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-areas:
+        "hd hd hd hd hd hd hd hd hd hd hd hd"
+        ". . . . ct ct ct ct . . . .";
+}
+
+@media screen and (max-width: 640px) {
+    .home-page-grid {
+        grid-template-areas:
+            "hd hd hd hd hd hd hd hd hd hd hd hd"
+            "ct ct ct ct ct ct ct ct ct ct ct ct";
+    }
+}
+@media screen and (min-width: 641px) and (max-width: 960px) {
+    .home-page-grid {
+        grid-template-areas:
+            "hd hd hd hd hd hd hd hd hd hd hd hd"
+            ". . . ct ct ct ct ct ct . . .";
+    }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--dark-black);
+    font-family: "Lato";
+    font-weight: bold;
+}
+
+header {
+    margin-left: var(--large-margin);
+    margin-right: var(--large-margin);
+    margin-top: var(--large-margin);
+}
+
+main {
+    margin-left: var(--large-margin);
+    margin-right: var(--large-margin);
+    margin-bottom: var(--large-margin);
+}
+
+.content {
+    grid-area: ct;
+}
+
+.main-header {
+    grid-area: hd;
+}
+
+.holder {
+    display: flex;
+    flex-direction: column;
+}
+
+.location {
+    display: flex;
+    flex-direction: row;
+}
+
+.uk-panel-box {
+    padding: var(--small-margin);
+    color: var(--light-black);
+    border: 1px solid var(--dark-grey);
+    border-radius: var(--border-radius);
+}
+
+.uk-button {
+    border-radius: var(--border-radius);
+}
+
+#name {
+    margin-top: 0;
+    margin-bottom: var(--extra-small-margin);
+}
+
+#icon {
+    font-size: 28px;
+    margin-right: 5px;
+    vertical-align: -5px;
+}
+
+#temp {
+    font-size: 24px;
+}
+
+#content {
+    padding-bottom: var(--extra-small-margin);
+}
+
+#entry-holder {
+    display: none;
+    padding-top: var(--extra-small-margin);
+    background-color: var(--light-grey);
+}
