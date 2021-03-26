@@ -23,6 +23,5 @@ export {
   updateResults,
   submitInfo,
   inputCountry,
-  updateUI,
   SparqlEndpointFetcher,
 };
