@@ -57,7 +57,7 @@ if (!fs.existsSync(dirPath)) {
   Setting a timeout of 120 seconds (server standard time) for feedback
   purposes in specific routes.
 */
-const serverTimeOut = '120s';
+const serverTimeOut = '240s';
 
 /*
   Empty JS objects act as endpoints for the routes regarding request and response data
@@ -113,27 +113,21 @@ app.get('/', (req, res, next) => {
   When weather information is received on the postWeather route
   the projectData object is updated with that information.
 */
-const userSelection = (req, res) => {
+const userSelection = async (req, res) => {
   projectData = {
     city: req.body.city,
     countryCode: req.body.countryCode,
     date: req.body.date,
     preferredLanguage: req.body.preferredLanguage,
   };
-  console.log(`userSelection city: ${projectData.city}`);
-  console.log(`userSelection country: ${projectData.countryCode}`);
-  console.log(`userSelection date: ${projectData.date}`);
-  console.log(`userSelection preferredLanguage: ${projectData.preferredLanguage}`);
+  // console.log(`userSelection city: ${projectData.city}`);
+  // console.log(`userSelection country: ${projectData.countryCode}`);
+  // console.log(`userSelection date: ${projectData.date}`);
+  // console.log(`userSelection preferredLanguage: ${projectData.preferredLanguage}`);
   // The Geonames API is called
-  queryService.getData(projectData.city, projectData.countryCode, projectData.date);
+  // setTimeout(res.sendStatus(205), 2000);
 };
 app.post('/api/postUserSelection', userSelection);
-
-// The getProjectData exposes the projectData object.
-const getProjectData = (req, res) => {
-  res.send(projectData);
-};
-app.get('/api/getProjectData', getProjectData);
 
 // The getCountries exposes an object consisting of country codes and their respective names.
 const getCountries = (req, res) => {
@@ -141,12 +135,23 @@ const getCountries = (req, res) => {
 };
 app.get('/api/getCountries', getCountries);
 
-// const getCity = () => {
-//   // const ids = 'Q314618';
-//   // const uri = wdk.getEntities(ids);
-//   const uri = wdk.searchEntities('Los Angeles');
-//   queryWikiData(uri);
-// };
-// getCity();
+/*
+  Handling of the data that was collected
+  from the different APIs.
+*/
+const postApiData = (req, res) => {
+  console.log(req.body);
+  projectData = req.body;
+  // console.log(`project data forecast: ${projectData.forecast_0}`);
+};
+app.post('/api/postApiData', postApiData);
 
-// queryService.queryDbPedia();
+// The getProjectData exposes the projectData object.
+const getProjectData = async (req, res) => {
+  // eslint-disable-next-line max-len
+  const data = await queryService.getData(projectData.city, projectData.countryCode, projectData.date);
+  console.log(`data to be sent, really: ${projectData}`);
+  // Todo: set data when ready
+  res.send(projectData);
+};
+app.get('/api/getProjectData', getProjectData);
