@@ -31,8 +31,8 @@ let locationInfo = {
 // https://stackoverflow.com/questions/12740659/downloading-images-with-node-js
 const download = (uri, filename, callback) => {
   request.head(uri, (err, res, body) => {
-    console.log('content-type:', res.headers['content-type']);
-    console.log('content-length:', res.headers['content-length']);
+    // console.log('content-type:', res.headers['content-type']);
+    // console.log('content-length:', res.headers['content-length']);
     request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
   });
 };
@@ -45,7 +45,7 @@ const logObject = (object = {}) => {
 };
 
 const postData = async (uri, data) => {
-  console.log(`data to post: ${JSON.stringify(data)}`);
+  // console.log(`data to post: ${JSON.stringify(data)}`);
   await fetch(uri, {
     method: 'POST',
     mode: 'cors',
@@ -108,12 +108,12 @@ const queryDbPedia = async (queryType, longitude, latitude, city) => {
     FILTER (lang(?abstract) = 'en' and lang(?label) = 'en' and lang(?comment) = 'en')
     FILTER (?place = :${cityDbResource})
   } ${queryLimit}`;
-  console.log(`sparqlQuery: ${sparqlQuery}`);
+  // console.log(`sparqlQuery: ${sparqlQuery}`);
   try {
     // The query's answer is parsed
     if (queryType === 'SELECT' || queryType === 'SELECT DISTINCT') {
-      const answer = await fetcher.fetchBindings('https://dbpedia.org/sparql', sparqlQuery);
-      return answer;
+      const data = await fetcher.fetchBindings('https://dbpedia.org/sparql', sparqlQuery);
+      return data;
     }
     if (queryType === 'ASK') {
       const answer = await fetcher.fetchAsk('https://dbpedia.org/sparql', sparqlQuery);
@@ -135,7 +135,7 @@ const queryPixabay = async (object = {}) => {
     const dirPath = path.join(`${process.cwd()}/dist`, '/cache');
     // If the API sends OK, text information is returned.
     if (res.ok) {
-      console.log(res.status);
+      // console.log(res.status);
       let response = await res.json();
 
       /*
@@ -143,7 +143,7 @@ const queryPixabay = async (object = {}) => {
         the country is carried out.
       */
       if (response.totalHits === 0) {
-        console.log('no hits');
+        // console.log('no hits');
         uri = `https://pixabay.com/api/?key=${apiKey}&q=${object.countryName}&editors_choice=true&category=travel&image_type=photo&orientation=horizontal`;
         console.log(`get country info from Pixabay API: ${encodeURI(uri)}`);
         res = await fetch(encodeURI(uri));
@@ -178,21 +178,21 @@ const queryPixabay = async (object = {}) => {
       // The image id is appended to the locationInfo object.
       locationInfo.imageId = selectImage().id;
 
-      console.log(locationInfo.forecast);
+      // console.log(locationInfo.forecast);
       // The data is posted so is can be retrieved by the client in another step
       // Todo: retrieve port dynamically
       postData('http://localhost:8081/api/postApiData', locationInfo);
     }
     if (!res.ok) {
-      console.log(res.status);
+      // console.log(res.status);
       // Todo: set default image
     }
   } catch (error) {
     // Todo: error handling
     console.error('the following error occured: ', error.message);
   }
-  logObject(locationInfo);
-  return null;
+  // logObject(locationInfo);
+  return locationInfo;
 };
 
 const queryWeatherbit = async (object = {}) => {
@@ -236,7 +236,7 @@ const queryWeatherbit = async (object = {}) => {
       getExtensiveForecast();
 
       // Get the image for the location
-      queryPixabay(locationInfo);
+      // queryPixabay(locationInfo);
 
       // Iterating through dates: https://stackoverflow.com/questions/4345045/loop-through-a-date-range-with-javascript
       // console.log(locationInfo.forecast[locationInfo.date]);
@@ -251,7 +251,7 @@ const queryWeatherbit = async (object = {}) => {
     // Todo: error handling
     console.error('the following error occured: ', error.message);
   }
-  return null;
+  return locationInfo;
 };
 
 /*
@@ -319,7 +319,7 @@ exports.getData = async (location, countryCode, date) => {
                       if (bindings.wikiPageId) {
                         locationInfo.wikiPageId = bindings.wikiPageId.value;
                       }
-                      queryWeatherbit(locationInfo);
+                      // queryWeatherbit(locationInfo);
                     });
                   },
                   /*
@@ -333,9 +333,16 @@ exports.getData = async (location, countryCode, date) => {
                 If there is nothing returned by the ASK query the previously retrieved information
                 is transferred.
               */
-              queryWeatherbit(locationInfo);
+              // queryWeatherbit(locationInfo);
             }
           },
+        ).then(
+          queryWeatherbit(locationInfo),
+        ).then(
+          queryPixabay(locationInfo),
+        )
+        .then(
+          postData('http://localhost:8081/api/postApiData', locationInfo),
         );
     }
     /*
@@ -351,7 +358,7 @@ exports.getData = async (location, countryCode, date) => {
     // Todo: Message to UI
     console.error('the following error occured: ', error.message);
   }
-  // console.log(`final locationInfo: ${locationInfo.abstract}`);
+
   // Todo: get the final value of locationInfo
-  return locationInfo;
+  // return null;
 };
