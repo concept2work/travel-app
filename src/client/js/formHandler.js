@@ -133,35 +133,6 @@ const getInput = () => {
   return userInput;
 };
 
-/*
-  The postUserData function specifies a POST request in which a data object is passed in the
-  request body.
-*/
-// const postUserSelection = async (uri, data = {}) => {
-//   console.log(uri);
-//   console.log(`data.countryCode: ${data.countryCode}`);
-//   await fetch(uri, {
-//     method: 'POST',
-//     credentials: 'same-origin',
-//     headers: {
-//       'Content-Type': 'application/json',
-//     },
-//     body: JSON.stringify(data),
-//   }).catch((error) => {
-//     console.error('the following error occured: ', error.message);
-//   });
-// };
-
-const getProjectData = async () => {
-  const res = await fetch(queryLocalServer('/api/getProjectData'));
-  try {
-    const response = await res.json();
-    console.log(response);
-  } catch (error) {
-    console.error('the following error occured: ', error.message);
-  }
-};
-
 const postUserSelection = async () => {
   const settings = {
     method: 'POST',
@@ -172,14 +143,13 @@ const postUserSelection = async () => {
     body: JSON.stringify(getInput()),
   };
   try {
-    const req = await fetch(queryLocalServer('/api/postUserSelection'), settings);
-    // const data = await res.json();
-    if (req.ok) {
-      console.log(req.status);
-    }
+    const fetchResponse = await fetch(queryLocalServer('/api/postUserSelection'), settings);
+    const data = await fetchResponse.json();
+    console.log('data received');
+    return data;
   } catch (error) {
     console.error('the following error occured: ', error.message);
-    // return e;
+    return error;
   }
 };
 
@@ -189,9 +159,7 @@ const postUserSelection = async () => {
 */
 const submitInfo = () => {
   console.log('Button clicked.');
-  postUserSelection().then(
-    getProjectData(),
-  );
+  postUserSelection().then((response) => console.log(response));
 };
 
 /*
@@ -201,9 +169,7 @@ const submitInfo = () => {
 document.getElementById('city').addEventListener('keypress', (event) => {
   if (event.key === 'Enter') {
     console.log('Enter pressed.');
-    postUserSelection().then(
-      getProjectData(),
-    );
+    postUserSelection().then((response) => console.log(response));
   }
 });
 
