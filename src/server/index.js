@@ -109,6 +109,8 @@ app.get('/', (req, res, next) => {
   next();
 });
 
+const sendData = async () => setTimeout(projectData, 2000);
+
 /*
   When weather information is received on the postWeather route
   the projectData object is updated with that information.
@@ -120,12 +122,12 @@ const userSelection = async (req, res) => {
     date: req.body.date,
     preferredLanguage: req.body.preferredLanguage,
   };
-  // console.log(`userSelection city: ${projectData.city}`);
-  // console.log(`userSelection country: ${projectData.countryCode}`);
-  // console.log(`userSelection date: ${projectData.date}`);
-  // console.log(`userSelection preferredLanguage: ${projectData.preferredLanguage}`);
-  // The Geonames API is called
-  // setTimeout(res.sendStatus(205), 2000);
+  await queryService.getGeoData(
+    projectData.city, projectData.countryCode, projectData.date,
+  ).then((response) => queryService.queryWeatherbit(response))
+    .then((response) => queryService.queryDbPedia(response))
+    .then((response) => queryService.queryPixabay(response))
+    .then((response) => res.send(response));
 };
 app.post('/api/postUserSelection', userSelection);
 
@@ -145,13 +147,3 @@ const postApiData = (req, res) => {
   // console.log(`project data forecast: ${projectData.forecast_0}`);
 };
 app.post('/api/postApiData', postApiData);
-
-// The getProjectData exposes the projectData object.
-const getProjectData = async (req, res) => {
-  // eslint-disable-next-line max-len
-  const data = await queryService.getData(projectData.city, projectData.countryCode, projectData.date);
-  console.log(`data to be sent, really: ${projectData}`);
-  // Todo: set data when ready
-  res.send(projectData);
-};
-app.get('/api/getProjectData', getProjectData);
