@@ -15,15 +15,6 @@ const request = require('request');
 // Module to send queries to SPARQL endpoints, used to query DBpedia
 const { SparqlEndpointFetcher } = require('fetch-sparql-endpoint');
 
-// Todo: remove dependencies
-// const WBK = require('wikibase-sdk');
-// const { data } = require('autoprefixer');
-
-// const wdk = WBK({
-//   instance: 'https://www.wikidata.org',
-//   sparqlEndpoint: 'https://query.wikidata.org/sparql',
-// });
-
 let locationInfo = {
 };
 
@@ -68,28 +59,30 @@ const postData = async (uri, data) => {
   DBpedia is queried for additional information. DBpedia provides a SPARQL endpoint
   which is queried with the help of the fetch-sparql-endpoint library. As additional
   information the full abstract of a city's Wikipedia article is tried to retrieve.
+  Via the latitude and longitude values the suiting article information is going to be
+  queried. For this procedure two steps are neccessary. In the first step a ASK query
+  is run that returns true or false for the query. Only if true is returned, the
+  SELECT DISTINCT query is run that returns specific data.
 */
-const queryDbPedia = async (queryType, longitude, latitude, city) => {
+// Todo: read values from object
+exports.queryDbPedia = async (object = {}) => {
   /*
-    Todo: explain distinction between query types.
     The article of a city is tried to retrieve via the latitude and longitude values
     that are provided by the Geonames API. The coordinates get adjusted since they do
     not match exactly the values in DBpedia. Therefore a range is set via various FILTER
     settings in the SPARQL query.
   */
-  let queryLimit = '';
-  let queryTypeSuffix = '';
-  if (queryType === 'SELECT' || queryType === 'SELECT DISTINCT') {
-    queryTypeSuffix = '?place ?abstract ?area ?population ?comment';
-    queryLimit = 'LIMIT 1';
-  }
+  // queryType, longitude, latitude, city;
+  const { longitude } = object;
+  const { latitude } = object;
+  const { city } = object;
   const cityDbResource = city.replace(/ /g, '_');
   const longLess = parseFloat(longitude) - 0.25;
   const longMore = parseFloat(longitude) + 0.25;
   const latLess = parseFloat(latitude) - 0.25;
   const latMore = parseFloat(latitude) + 0.25;
   const fetcher = new SparqlEndpointFetcher();
-  const sparqlQuery = `PREFIX : <http://dbpedia.org/resource/>
+  const sparqlQuery = (queryType, queryTypeSuffix, queryLimit) => `PREFIX : <http://dbpedia.org/resource/>
   ${queryType} ${queryTypeSuffix}
   WHERE {
     VALUES ?cityType { schema:City wikidata:Q486972 } 
@@ -110,22 +103,32 @@ const queryDbPedia = async (queryType, longitude, latitude, city) => {
   } ${queryLimit}`;
   // console.log(`sparqlQuery: ${sparqlQuery}`);
   try {
-    // The query's answer is parsed
-    if (queryType === 'SELECT' || queryType === 'SELECT DISTINCT') {
-      const data = await fetcher.fetchBindings('https://dbpedia.org/sparql', sparqlQuery);
-      return data;
-    }
-    if (queryType === 'ASK') {
-      const answer = await fetcher.fetchAsk('https://dbpedia.org/sparql', sparqlQuery);
-      return answer;
-    }
+    const data = await fetcher.fetchBindings('https://dbpedia.org/sparql', sparqlQuery(
+      'SELECT DISTINCT', '?place ?abstract ?area ?population ?comment', 'LIMIT 1',
+    ));
+    data.on('data', (bindings) => {
+      locationInfo.abstract = bindings.abstract.value;
+      if (bindings.comment) {
+        locationInfo.comment = bindings.comment.value;
+      }
+      if (bindings.area) {
+        locationInfo.area = bindings.area.value;
+      }
+      if (bindings.population) {
+        locationInfo.population = bindings.population.value;
+      }
+      if (bindings.wikiPageId) {
+        locationInfo.wikiPageId = bindings.wikiPageId.value;
+      }
+    });
+    return locationInfo;
   } catch (error) {
     console.error('the following error occured: ', error.message);
   }
   return null;
 };
 
-const queryPixabay = async (object = {}) => {
+exports.queryPixabay = async (object = {}) => {
   const apiKey = process.env.PIXABAY_API_KEY;
   let uri = `https://pixabay.com/api/?key=${apiKey}&q=${object.city}+${object.countryName}&image_type=photo&orientation=horizontal`;
   let res = await fetch(encodeURI(uri));
@@ -181,7 +184,8 @@ const queryPixabay = async (object = {}) => {
       // console.log(locationInfo.forecast);
       // The data is posted so is can be retrieved by the client in another step
       // Todo: retrieve port dynamically
-      postData('http://localhost:8081/api/postApiData', locationInfo);
+      // postData('http://localhost:8081/api/postApiData', locationInfo);
+      return locationInfo;
     }
     if (!res.ok) {
       // console.log(res.status);
@@ -192,10 +196,11 @@ const queryPixabay = async (object = {}) => {
     console.error('the following error occured: ', error.message);
   }
   // logObject(locationInfo);
-  return locationInfo;
+  // postData('http://localhost:8081/api/postApiData', locationInfo);
+  return null;
 };
 
-const queryWeatherbit = async (object = {}) => {
+exports.queryWeatherbit = async (object = {}) => {
   const apiKey = process.env.WEATHERBIT_API_KEY;
   // A 16 day forecast for the location is requested
   const uri = `https://api.weatherbit.io/v2.0/forecast/daily?lat=${object.latitude}&lon=${object.longitude}&key=${apiKey}`;
@@ -264,7 +269,8 @@ const queryWeatherbit = async (object = {}) => {
     The data for the client is accumulated. In the first step the latitude and longitude
     values from the submitted city are retrieved from the Geonames API.
   */
-exports.getData = async (location, countryCode, date) => {
+exports.getGeoData = async (location, countryCode, date) => {
+  // Todo: Weather API in distinct function. Start promise chain in this function.
   // Geonames API options
   const userName = process.env.GEONAMES_USER;
   console.log('GeoNames API is called');
@@ -288,68 +294,13 @@ exports.getData = async (location, countryCode, date) => {
         countryName: response.geonames[0].countryName,
         date,
       };
-      /*
-        DPpedia is queried for additional information. Via the latitude and longitude values
-        the suiting article information is going to be queried. For this procedure two steps
-        are neccessary. In the first step a ASK query is run that returns true or false for
-        the query. Only if true is returned, the SELECT DISTINCT query is run that returns
-        specific data.
-      */
-      queryDbPedia('ASK', locationInfo.longitude, locationInfo.latitude, locationInfo.city)
-        .then(
-          (answer) => {
-            if (answer === true) {
-              // console.log(answer);
-              queryDbPedia('SELECT DISTINCT', locationInfo.longitude, locationInfo.latitude, locationInfo.city)
-                .then(
-                  (bindingsStream) => {
-                    bindingsStream.on('data', (bindings) => {
-                      // If the promise is successful the abstract is added.
-                      locationInfo.abstract = bindings.abstract.value;
-                      // locationInfo.wikiPageId = bindings.comment.value;
-                      if (bindings.comment) {
-                        locationInfo.comment = bindings.comment.value;
-                      }
-                      if (bindings.area) {
-                        locationInfo.area = bindings.area.value;
-                      }
-                      if (bindings.population) {
-                        locationInfo.population = bindings.population.value;
-                      }
-                      if (bindings.wikiPageId) {
-                        locationInfo.wikiPageId = bindings.wikiPageId.value;
-                      }
-                      // queryWeatherbit(locationInfo);
-                    });
-                  },
-                  /*
-                    Since a ASK query was run that was returned true, no specific error handling
-                    is neccessary.
-                  */
-                );
-            }
-            if (answer === false) {
-              /*
-                If there is nothing returned by the ASK query the previously retrieved information
-                is transferred.
-              */
-              // queryWeatherbit(locationInfo);
-            }
-          },
-        ).then(
-          queryWeatherbit(locationInfo),
-        ).then(
-          queryPixabay(locationInfo),
-        )
-        .then(
-          postData('http://localhost:8081/api/postApiData', locationInfo),
-        );
+      return locationInfo;
     }
     /*
-        In any other case an error message is displayed to the user.
-        The error message is retrieved from the API to provide a meaningful
-        error message to the user.
-      */
+      In any other case an error message is displayed to the user.
+      The error message is retrieved from the API to provide a meaningful
+      error message to the user.
+    */
     if (!res.ok) {
       const errorData = await res.json();
       return errorData;
@@ -360,5 +311,5 @@ exports.getData = async (location, countryCode, date) => {
   }
 
   // Todo: get the final value of locationInfo
-  // return null;
+  return null;
 };
