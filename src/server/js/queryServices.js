@@ -1,11 +1,12 @@
-// Dotenv is used to read values from the .env file
-const dotenv = require('dotenv');
+// import { promises } from 'fs';
 
 // Node fetch is required to query the external API via fetch()
 const fetch = require('node-fetch');
 
 // Todo: remove dependencies
 // const _ = require('lodash/core');
+
+const Axios = require('axios');
 
 // Modules required for image download
 const path = require('path');
@@ -14,6 +15,13 @@ const request = require('request');
 
 // Module to send queries to SPARQL endpoints, used to query DBpedia
 const { SparqlEndpointFetcher } = require('fetch-sparql-endpoint');
+
+const logObject = (object = {}) => {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const [key, value] of Object.entries(object)) {
+    console.log(`${key}: ${value}`);
+  }
+};
 
 let locationInfo = {
 };
@@ -25,33 +33,6 @@ const download = (uri, filename, callback) => {
     // console.log('content-type:', res.headers['content-type']);
     // console.log('content-length:', res.headers['content-length']);
     request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
-  });
-};
-
-const logObject = (object = {}) => {
-  // eslint-disable-next-line no-restricted-syntax
-  for (const [key, value] of Object.entries(object)) {
-    console.log(`${key}: ${value}`);
-  }
-};
-
-const postData = async (uri, data) => {
-  // console.log(`data to post: ${JSON.stringify(data)}`);
-  await fetch(uri, {
-    method: 'POST',
-    mode: 'cors',
-    credentials: 'same-origin',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  }).catch((error) => {
-    // Todo: Error message to client
-    // updateIndex.resetView();
-    // updateIndex.removeSpinner();
-    // eslint-disable-next-line max-len
-    // document.getElementById('results').insertAdjacentHTML('beforeEnd', updateIndex.getServerErrorMessage());
-    console.error('the following error occured: ', error.message);
   });
 };
 
@@ -72,7 +53,6 @@ exports.queryDbPedia = async (object = {}) => {
     not match exactly the values in DBpedia. Therefore a range is set via various FILTER
     settings in the SPARQL query.
   */
-  // queryType, longitude, latitude, city;
   const { longitude } = object;
   const { latitude } = object;
   const { city } = object;
@@ -85,7 +65,7 @@ exports.queryDbPedia = async (object = {}) => {
   const sparqlQuery = (queryType, queryTypeSuffix, queryLimit) => `PREFIX : <http://dbpedia.org/resource/>
   ${queryType} ${queryTypeSuffix}
   WHERE {
-    VALUES ?cityType { schema:City wikidata:Q486972 } 
+    VALUES ?cityType { schema:City wikidata:Q486972 dbo:City } 
     ?place geo:lat ?lat.
     ?place geo:long ?long.
     ?place rdf:type ?cityType.
@@ -101,7 +81,7 @@ exports.queryDbPedia = async (object = {}) => {
     FILTER (lang(?abstract) = 'en' and lang(?label) = 'en' and lang(?comment) = 'en')
     FILTER (?place = :${cityDbResource})
   } ${queryLimit}`;
-  // console.log(`sparqlQuery: ${sparqlQuery}`);
+  console.log(`sparqlQuery: ${sparqlQuery}`);
   try {
     const data = await fetcher.fetchBindings('https://dbpedia.org/sparql', sparqlQuery(
       'SELECT DISTINCT', '?place ?abstract ?area ?population ?comment', 'LIMIT 1',
@@ -130,9 +110,22 @@ exports.queryDbPedia = async (object = {}) => {
 
 exports.queryPixabay = async (object = {}) => {
   const apiKey = process.env.PIXABAY_API_KEY;
-  let uri = `https://pixabay.com/api/?key=${apiKey}&q=${object.city}+${object.countryName}&image_type=photo&orientation=horizontal`;
+  let uri;
+
+  // General query with one key/value from passed object
+  uri = `https://pixabay.com/api/?key=${apiKey}&q=${object[Object.keys(object)[0]]}&image_type=photo&orientation=horizontal&per_page=200`;
+
+  // City specific query
+  if (object.city && object.countryName) {
+    uri = `https://pixabay.com/api/?key=${apiKey}&q=${object.city}+${object.countryName}&image_type=photo&orientation=horizontal&per_page=200`;
+  }
+
   let res = await fetch(encodeURI(uri));
-  console.log(`get city and country info from Pixabay API: ${encodeURI(uri)}`);
+  console.log(`get image from Pixabay API: ${encodeURI(uri)}`);
+
+  // https:// stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript
+  const randomIntFromInterval = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
+
   try {
     // The download path is set.
     const dirPath = path.join(`${process.cwd()}/dist`, '/cache');
@@ -145,9 +138,9 @@ exports.queryPixabay = async (object = {}) => {
         If no image is found for the city and country, a search only for
         the country is carried out.
       */
-      if (response.totalHits === 0) {
+      if (object.city && object.countryName && response.totalHits === 0) {
         // console.log('no hits');
-        uri = `https://pixabay.com/api/?key=${apiKey}&q=${object.countryName}&editors_choice=true&category=travel&image_type=photo&orientation=horizontal`;
+        uri = `https://pixabay.com/api/?key=${apiKey}&q=${object.countryName}&editors_choice=true&category=travel&image_type=photo&orientation=horizontal&per_page=200`;
         console.log(`get country info from Pixabay API: ${encodeURI(uri)}`);
         res = await fetch(encodeURI(uri));
         response = await res.json();
@@ -155,18 +148,37 @@ exports.queryPixabay = async (object = {}) => {
 
       const pixabayImages = response.hits;
 
+      // Get a random image index number
+      const randomIndexNumber = randomIntFromInterval(0, 200);
+      console.log(randomIndexNumber);
+
+      // let selectImage;
+
+      // console.log(pixabayImages[randomIndexNumber].id);
+
       /*
         Getting the image with the most favorites. The solution to find
         the image in the response object is adapted from senocular
         (https://www.reddit.com/r/javascript/comments/7xhjg9/es6_find_the_maximum_number_of_an_array_of_objects/).
       */
-      const selectImage = () => (pixabayImages.reduce(
-        (max, image) => (max && max.favorites > image.favorites ? max : image), null,
-      ));
+      // if (object.city && object.countryName) {
+      //   selectImage = () => (pixabayImages.reduce(
+      //     (max, image) => (max && max.favorites > image.favorites ? max : image), null,
+      //   ));
+      // }
+
+      const selectImage = () => {
+        if (object.city && object.countryName) {
+          return (pixabayImages.reduce(
+            (max, image) => (max && max.favorites > image.favorites ? max : image), null,
+          ));
+        }
+        return pixabayImages[randomIndexNumber];
+      };
 
       /*
         Hotlinking of images is not allowed. Therefore the image is downloaded if it is
-        not cached. Therefore a check via the image id is carried out.
+        not cached. A check via the image id is carried out.
       */
       fs.access(`${dirPath}/${selectImage().id}.jpg`, fs.F_OK, (err) => {
         // Solution adapted from Flavio Copes
@@ -179,12 +191,10 @@ exports.queryPixabay = async (object = {}) => {
         // If the file already exists, nothing happens since the file is cached.
       });
       // The image id is appended to the locationInfo object.
-      locationInfo.imageId = selectImage().id;
 
-      // console.log(locationInfo.forecast);
-      // The data is posted so is can be retrieved by the client in another step
-      // Todo: retrieve port dynamically
-      // postData('http://localhost:8081/api/postApiData', locationInfo);
+      locationInfo.imageId = selectImage().id;
+      locationInfo.largeImageURL = selectImage().largeImageURL;
+      console.log(`queryPixabay imageId: ${locationInfo.imageId}`);
       return locationInfo;
     }
     if (!res.ok) {
@@ -195,11 +205,80 @@ exports.queryPixabay = async (object = {}) => {
     // Todo: error handling
     console.error('the following error occured: ', error.message);
   }
-  // logObject(locationInfo);
-  // postData('http://localhost:8081/api/postApiData', locationInfo);
   return null;
 };
 
+// exports.downloadFile = async (object = {}) => {
+//   // Todo: async function as explained in
+//   // https://dev.to/mrm8488/from-callbacks-to-fspromises-to-handle-the-file-system-in-nodejs-56p2
+//   // check https://gist.github.com/senthilmpro/072f5e69bdef4baffc8442c7e696f4eb
+//   console.log(`downloadFile function image id: ${object.imageId}`);
+//   const dirPath = path.join(`${process.cwd()}/dist`, '/cache');
+//   try {
+//     await fsp.access(`${dirPath}/${object.imageId}.jpg`, fs.F_OK, (err) => {
+//       // Solution adapted from Flavio Copes
+//       // (https://flaviocopes.com/how-to-check-if-file-exists-node/)
+//       if (!err) {
+//         download(object.largeImageURL, `${dirPath}/${object.imageId}.jpg`, () => {
+//           console.log(`download of Pixabay image async downloadFile ${object.largeImageURL} with the id ${object.imageId}`);
+//           console.log(`object.imageId: ${object.imageId}`);
+//           return object.imageId;
+//         });
+//       }
+
+//       // If the file already exists, nothing happens since the file is cached.
+//     });
+//   } catch (error) {
+//     console.error(error);
+//   }
+//   // return object;
+// };
+
+// exports.downloadFile = async (object = {}) => {
+//   // Todo: async function as explained in
+//   // https://dev.to/mrm8488/from-callbacks-to-fspromises-to-handle-the-file-system-in-nodejs-56p2
+//   console.log(`downloadFile function image id: ${object.imageId}`);
+//   const dirPath = path.join(`${process.cwd()}/dist`, '/cache');
+//   // const writeStream = fs.createWriteStream(dirPath);
+//   fs.access(`${dirPath}/${object.imageId}.jpg`, fs.F_OK, (err) => {
+//   // Solution adapted from Flavio Copes
+//   // (https://flaviocopes.com/how-to-check-if-file-exists-node/)
+//     if (err) {
+//       download(object.largeImageURL, `${dirPath}/${object.imageId}.jpg`, () => {
+//         console.log(`download of Pixabay image ${object.largeImageURL} with the id ${object.imageId}`);
+//       });
+//     }
+//   // If the file already exists, nothing happens since the file is cached.
+//   });
+//   return object;
+//   // fs.access.on('finish', object.imageId);
+
+// // on finish event resolve the promise
+// // fs.access.on('finish', resolve);
+// };
+
+// exports.downloadFile = async (object = {}) => new Promise((resolve) => {
+//   const dirPath = path.join(`${process.cwd()}/dist`, '/cache');
+//   // const writeStream = fs.createWriteStream(dirPath);
+//   fs.access(`${dirPath}/${object.imageId}.jpg`, fs.F_OK, (err) => {
+//     // Solution adapted from Flavio Copes
+//     // (https://flaviocopes.com/how-to-check-if-file-exists-node/)
+//     if (err) {
+//       download(object.largeImageURL, `${dirPath}/${object.imageId}.jpg`, () => {
+//         console.log(`download of Pixabay image with ${object.largeImageURL} with the id ${object.imageId}`);
+//         resolve({ object });
+//       });
+//     }
+//     // If the file already exists, nothing happens since the file is cached.
+//   });
+//   // on finish event resolve the promise
+//   // fs.access.on('finish', resolve);
+// });
+
+/*
+  Todo: adapt function for requirement If the trip is within a week, you will get the
+  current weather forecast. If the trip is in the future, you will get a predicted forecast.
+*/
 exports.queryWeatherbit = async (object = {}) => {
   const apiKey = process.env.WEATHERBIT_API_KEY;
   // A 16 day forecast for the location is requested
@@ -218,8 +297,13 @@ exports.queryWeatherbit = async (object = {}) => {
         for (const [i, forecastInfo] of response.data.entries()) {
           dailyForecast[i] = {
             date: forecastInfo.valid_date,
-            temp: forecastInfo.temp,
+            avg_temp: forecastInfo.temp,
+            temp_min: forecastInfo.app_min_temp,
+            temp_max: forecastInfo.app_max_temp,
+            pop: forecastInfo.pop,
+            uv: forecastInfo.uv,
             code: forecastInfo.weather.code,
+            icon: forecastInfo.weather.icon,
             description: forecastInfo.weather.description,
           };
         }
@@ -239,13 +323,6 @@ exports.queryWeatherbit = async (object = {}) => {
         Object.assign(locationInfo, locationInfo.forecast);
       };
       getExtensiveForecast();
-
-      // Get the image for the location
-      // queryPixabay(locationInfo);
-
-      // Iterating through dates: https://stackoverflow.com/questions/4345045/loop-through-a-date-range-with-javascript
-      // console.log(locationInfo.forecast[locationInfo.date]);
-      // console.log(locationInfo.forecast['2021-03-26']);
     }
     if (!res.ok) {
       const errorData = await res.json();
