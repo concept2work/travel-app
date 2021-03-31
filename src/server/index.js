@@ -39,12 +39,6 @@ dotenv.config();
 app.use('/open-weather-icons', express.static(`${__dirname}/node_modules/open-weather-icons/dist/`));
 
 /*
-  UIkit (https://getuikit.com) is used for styling purposes and feedback functionality on the page.
-  This makes also the use of UIkit in app.js possible.
-*/
-app.use('/uikit', express.static(`${__dirname}/node_modules/uikit/dist/`));
-
-/*
   Creating a cache folder for downloads from Pixabay.
 */
 const dirPath = path.join(`${process.cwd()}/dist`, '/cache');
@@ -109,13 +103,11 @@ app.get('/', (req, res, next) => {
   next();
 });
 
-const sendData = async () => setTimeout(projectData, 2000);
-
 /*
   When weather information is received on the postWeather route
   the projectData object is updated with that information.
 */
-const userSelection = async (req, res) => {
+const processUserInput = async (req, res) => {
   projectData = {
     city: req.body.city,
     countryCode: req.body.countryCode,
@@ -124,18 +116,33 @@ const userSelection = async (req, res) => {
   };
   await queryService.getGeoData(
     projectData.city, projectData.countryCode, projectData.date,
-  ).then((response) => queryService.queryWeatherbit(response))
+  )
+    .then((response) => queryService.queryWeatherbit(response))
     .then((response) => queryService.queryDbPedia(response))
     .then((response) => queryService.queryPixabay(response))
     .then((response) => res.send(response));
 };
-app.post('/api/postUserSelection', userSelection);
+app.post('/api/postUserSelection', processUserInput);
+
+// app.get('/city', (req, res) => res.send('City page'));
 
 // The getCountries exposes an object consisting of country codes and their respective names.
 const getCountries = (req, res) => {
   res.send(countries.getNames('en', { select: 'official' }));
 };
 app.get('/api/getCountries', getCountries);
+
+const homePageImage = async (req, res) => {
+  const image = {
+    topic: 'city travel',
+  };
+  queryService.queryPixabay(image)
+    .then((response) => queryService.downloadFile(response))
+    .then((response) => queryService.downloadImage(response))
+    .then((response) => res.send(response));
+  // .then((response) => console.log(`server response: ${response}`));
+};
+app.get('/api/getHomePageImage', homePageImage);
 
 /*
   Handling of the data that was collected
