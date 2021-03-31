@@ -120,12 +120,10 @@ const processUserInput = async (req, res) => {
     .then((response) => queryService.queryWeatherbit(response))
     .then((response) => queryService.queryDbPedia(response))
     .then((response) => queryService.queryPixabay(response))
-    // .then((response) => queryService.checkCache(response))
+    .then((response) => queryService.downloadFile(response))
     .then((response) => res.send(response));
 };
 app.post('/api/postUserSelection', processUserInput);
-
-// app.get('/city', (req, res) => res.send('City page'));
 
 // The getCountries exposes an object consisting of country codes and their respective names.
 const getCountries = (req, res) => {
@@ -138,9 +136,7 @@ const homePageImage = async (req, res) => {
     topic: 'city travel',
   };
   queryService.queryPixabay(image)
-    // .then((response) => queryService.downloadFile(response))
-    // .then((response) => res.send(response))
-    // .then((response) => console.log(`downloadFile response: ${response.imageId}`));
+    .then((response) => queryService.downloadFile(response))
     .then((response) => res.send(response));
 };
 app.get('/api/getHomePageImage', homePageImage);
@@ -152,6 +148,5 @@ app.get('/api/getHomePageImage', homePageImage);
 const postApiData = (req, res) => {
   console.log(req.body);
   projectData = req.body;
-  // console.log(`project data forecast: ${projectData.forecast_0}`);
 };
 app.post('/api/postApiData', postApiData);

@@ -1,6 +1,6 @@
 // The function displays a loading spinner
 const showSpinner = () => {
-  document.getElementById('loading-status').className = 'd-flex justify-content-center mt-3';
+  document.getElementById('loading-status').className = 'd-flex justify-content-center mt-5';
 };
 
 /*
@@ -21,6 +21,15 @@ const resetView = () => {
   while (resultList.firstChild) {
     resultList.removeChild(resultList.lastChild);
   }
+};
+
+const updateUI = async (object = {}) => {
+  // showSpinner();
+  document.getElementById('hero').style.backgroundImage = `url("./dist/cache/${object.imageId}.jpg")`;
+  document.getElementById('main-heading-contents').innerHTML = `${object.city}, ${object.countryName}`;
+  removeSpinner();
+  console.log(object);
+  // Todo check sentences and add paragraph after n sentences, see https://stackoverflow.com/questions/11761563/javascript-regexp-for-splitting-text-into-sentences-and-keeping-the-delimiter
 };
 
 const updateResults = (response) => {
@@ -55,6 +64,7 @@ startServiceWorker();
 export { showSpinner };
 export { removeSpinner };
 export { resetView };
+export { updateUI };
 export { updateResults };
 export { getServerErrorMessage };
 export { getUserErrorMessage };

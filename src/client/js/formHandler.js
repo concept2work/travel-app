@@ -1,8 +1,7 @@
 /* eslint-disable max-len */
-// Import UIkit components
-import UIkit from 'uikit';
-import Icons from 'uikit/dist/js/uikit-icons';
-import $ from 'jquery';
+import { updateUI } from './updateIndex';
+import { showSpinner } from './updateIndex';
+import { removeSpinner } from './updateIndex';
 
 // Function that sets the whole server path to a relative API path
 const queryLocalServer = (path) => {
@@ -17,66 +16,12 @@ const queryLocalServer = (path) => {
   return null;
 };
 
-// https://phrase.com/blog/posts/detecting-a-users-locale/
-// from Mohammad
-function getBrowserLocales(options = {}) {
-  const defaultOptions = {
-    languageCodeOnly: false,
-  };
-
-  const opt = {
-    ...defaultOptions,
-    ...options,
-  };
-
-  const browserLocales = navigator.languages === undefined
-    ? [navigator.language]
-    : navigator.languages;
-
-  if (!browserLocales) {
-    return undefined;
-  }
-
-  return browserLocales.map((locale) => {
-    const trimmedLocale = locale.trim();
-
-    return opt.languageCodeOnly
-      ? trimmedLocale.split(/-|_/)[0]
-      : trimmedLocale;
-  });
-}
-
-console.log(getBrowserLocales());
-
 /*
   The user can select the country for the weather info. US is the standard selection.
 */
 let selectedCountryCode = 'US';
 
 let userInput = {};
-
-// The Open Weather Map API specific info is provided.
-const apiKey = '415ad5403eda30ccec0cef7b078bf31a';
-const weatherServiceUri = 'api.openweathermap.org/data/2.5/weather?';
-
-// The zip code input is reused several times and and returned via a function.
-// const getCity = () => document.getElementById('city');
-
-// The user can input his/her current feelings. The function returns the value of the input.
-const getFeelings = () => document.getElementById('feelings').value;
-
-/*
-  In some occasions the user must correct his/her input.
-  For this reason the input field is highlighted so the user quickly sees
-  where to input corrected data.
-*/
-const highlightInput = () => {
-  document.getElementById('zip').style.cssText = 'border: solid 1px #f0506e;';
-};
-// After user input the highlighted field is unhiglighted.
-const unhighlightInput = () => {
-  document.getElementById('zip').style.cssText = 'border: none;';
-};
 
 /*
   The language selector is populated by the values  of the languages object
@@ -109,7 +54,6 @@ const getInput = () => {
     city: document.getElementById('city').value,
     countryCode: selectedCountryCode,
     date: document.getElementById('trip-date').value,
-    preferredLanguage: getBrowserLocales()[0],
   };
   console.log(`getInput.country: ${userInput.countryCode}`);
   console.log(`getInput.city: ${userInput.city}`);
@@ -136,16 +80,6 @@ const postUserSelection = async () => {
   }
 };
 
-/*
-  Event listener that checks if the generate button is clicked. Input is validated.
-  If the zip is valid the Weather API is queried.
-*/
-// const submitInfo = (event) => {
-//   console.log('Button clicked.');
-//   event.preventDefault();
-//   postUserSelection().then((response) => console.log(response));
-// };
-
 const submitInfo = (event) => {
   // If a result is already shown the view gets reset.
   // updateIndex.resetView();
@@ -159,14 +93,12 @@ const submitInfo = (event) => {
     }
     if (form.checkValidity() === true) {
       event.preventDefault();
-
       // The spinner is shown to feedback the loading process.
-      // updateIndex.showSpinner();
-
-      postUserSelection().then((response) => console.log(response));
-
-      // If loading takes too long, a message is displayed.
-      // updateIndex.getLoadingMessage();
+      showSpinner();
+      postUserSelection()
+        .then((response) => {
+          updateUI(response);
+        });
     }
     form.classList.add('was-validated');
   });
@@ -204,13 +136,9 @@ window.addEventListener('load', () => {
     }
     return null;
   };
-  // getHomePageImage();
-  // document.getElementById('hero').style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("./dist/cache/${image.imageId}.jpg");`;
-  // document.getElementById('hero').style.backgroundImage = `url("./dist/cache/${getHomePageImage()}.jpg")`;
-  // document.getElementById('hero').style.backgroundColor = 'red';
   getHomePageImage().then((result) => {
-    console.log(result);
     document.getElementById('hero').style.backgroundImage = `url("./dist/cache/${result}.jpg")`;
+    document.getElementById('main-heading-contents').innerHTML = 'City guides for all of the world';
   });
 });
 

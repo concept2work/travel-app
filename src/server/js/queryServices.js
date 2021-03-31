@@ -6,6 +6,8 @@ const fetch = require('node-fetch');
 // Todo: remove dependencies
 // const _ = require('lodash/core');
 
+const axios = require('axios');
+
 // Modules required for image download
 const path = require('path');
 const fs = require('fs');
@@ -206,39 +208,67 @@ exports.queryPixabay = async (object = {}) => {
   return null;
 };
 
+/*
+  Hotlinking of Pixabay images is not allowed. Therefore the image is downloaded.
+  The following solution was adapted by Senthil Muthuvel
+  (https://gist.github.com/senthilmpro/072f5e69bdef4baffc8442c7e696f4eb)
+  */
 exports.downloadFile = async (object = {}) => {
-  // Todo: async function as explained in
-  // https://dev.to/mrm8488/from-callbacks-to-fspromises-to-handle-the-file-system-in-nodejs-56p2
-  // check https://gist.github.com/senthilmpro/072f5e69bdef4baffc8442c7e696f4eb
-  console.log(`downloadFile function called image id: ${object.imageId}`);
-  const dirPath = path.join(`${process.cwd()}/dist`, '/cache');
-  // try {
-  await fs.promises.access(`${dirPath}/${object.imageId}.jpg`, fs.F_OK, (err) => {
-    console.log('await called');
-    // Solution adapted from Flavio Copes
-    // (https://flaviocopes.com/how-to-check-if-file-exists-node/)
-    try {
-      if (err) {
-        console.log('!err called');
-        download(object.largeImageURL, `${dirPath}/${object.imageId}.jpg`, () => {
-          console.log(`download of Pixabay image async downloadFile ${object.largeImageURL} with the id ${object.imageId}`);
-          console.log(`object.imageId: ${object.imageId}`);
-          // return object.imageId;
-        });
-      }
-      if (!err) {
-        console.log('no error');
-        // return object.imageId;
-      }
-    } catch {
-      console.error(error);
-    }
+  const uri = object.largeImageURL;
+  const { imageId } = object;
+
+  const dirPath = path.join(`${process.cwd()}/dist`, '/cache', `${imageId}.jpg`);
+
+  // Todo: only download if the file is not cached
+  // fs.access(`${dirPath}/${imageId.id}.jpg`, fs.F_OK, (err) => {
+  //   if (!err) {
+  //     console.log('image already there');
+  //   }
+  //   if (err) {
+  //     console.log('image not there');
+  //   }
+  // });
+
+  // axios image download with response type "stream"
+  const response = await axios.get(uri, {
+    responseType: 'stream',
   });
-  // } catch (error) {
-  //   console.error(error);
-  // }
-  // return null;
-  return object;
+
+  // pipe the result stream into a file on disc
+  response.data.pipe(fs.createWriteStream(dirPath));
+
+  // fs.access(`${dirPath}/${imageId.id}.jpg`, fs.F_OK, (err) => {
+  //   if (!err) {
+  //     response.data.pipe(fs.createWriteStream(dirPath));
+  //   }
+  // });
+
+  // fs.access(`${dirPath}/${selectImage().id}.jpg`, fs.F_OK, (err) => {
+  //   // Solution adapted from Flavio Copes
+  //   // (https://flaviocopes.com/how-to-check-if-file-exists-node/)
+  //   if (err) {
+  //     // download(selectImage().largeImageURL, `${dirPath}/${selectImage().id}.jpg`, () => {
+  //     //   console.log(`download of Pixabay image ${selectImage().largeImageURL} with the id ${selectImage().id}`);
+  //     // });
+  //     const downloadPath = path.resolve(process.cwd(), 'dist/cache', `${selectImage().id}.jpg`);
+  //     response.data.pipe(fs.createWriteStream(downloadPath));
+  //   }
+  //   // If the file already exists, nothing happens since the file is cached.
+  // });
+  // The image id is appended to the locationInfo object.
+
+  // return a promise and resolve when download finishes
+  return new Promise((resolve, reject) => {
+    response.data.on('end', () => {
+      console.log('resolved');
+      resolve(locationInfo);
+    });
+
+    response.data.on('error', () => {
+      console.log('rejected');
+      reject(locationInfo);
+    });
+  });
 };
 
 // exports.downloadFile = async (object = {}) => {
