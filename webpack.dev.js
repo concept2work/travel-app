@@ -9,13 +9,17 @@ const {
 } = process.env;
 
 module.exports = merge(common, {
+  // output: {
+  //   path: `${process.cwd()}/src/`,
+  //   publicPath: '/',
+  // },
   mode,
   devtool: 'source-map',
   devServer: {
     historyApiFallback: true,
     hot: true,
     inline: true,
-    port: process.env.PORT_DEV_FRONTEND,
+    port,
     proxy: {
       '/api': `http://localhost:${proxyport}`,
     },
