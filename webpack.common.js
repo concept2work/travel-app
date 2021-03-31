@@ -49,10 +49,9 @@ module.exports = {
       'process.env.PORT_DEV_PROXY': JSON.stringify(process.env.PORT_DEV_BACKEND),
       'process.env.PORT_PROD': JSON.stringify(process.env.PORT_PROD),
     }),
-    // new webpack.ProvidePlugin({
-    //   $: 'jquery',
-    //   jQuery: 'jquery',
-    //   autocomplete: 'autocomplete',
-    // }),
+    new webpack.ProvidePlugin({
+      $: 'jquery',
+      jQuery: 'jquery',
+    }),
   ],
 };
