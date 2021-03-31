@@ -2,6 +2,7 @@
 // Import UIkit components
 import UIkit from 'uikit';
 import Icons from 'uikit/dist/js/uikit-icons';
+import $ from 'jquery';
 
 // Function that sets the whole server path to a relative API path
 const queryLocalServer = (path) => {
@@ -46,24 +47,6 @@ function getBrowserLocales(options = {}) {
 }
 
 console.log(getBrowserLocales());
-
-// load the UIkit Icon plugin
-UIkit.use(Icons);
-
-// https://stackoverflow.com/questions/6982692/how-to-set-input-type-dates-default-value-to-today
-// Solution adapted from brianary
-// eslint-disable-next-line no-extend-native
-// Date.prototype.toDateInputValue = (function () {
-//   const local = new Date(this);
-//   local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
-//   return local.toJSON().slice(0, 10);
-// });
-
-// const getDate = () => {
-//   // const today = formatDate(currentDate);
-//   const today = new Date().toDateInputValue();
-//   return today;
-// };
 
 /*
   The user can select the country for the weather info. US is the standard selection.
@@ -157,9 +140,36 @@ const postUserSelection = async () => {
   Event listener that checks if the generate button is clicked. Input is validated.
   If the zip is valid the Weather API is queried.
 */
-const submitInfo = () => {
-  console.log('Button clicked.');
-  postUserSelection().then((response) => console.log(response));
+// const submitInfo = (event) => {
+//   console.log('Button clicked.');
+//   event.preventDefault();
+//   postUserSelection().then((response) => console.log(response));
+// };
+
+const submitInfo = (event) => {
+  // If a result is already shown the view gets reset.
+  // updateIndex.resetView();
+  const forms = document.getElementsByClassName('needs-validation');
+  Array.prototype.filter.call(forms, (form) => {
+    // const apiRequestUrl = document.getElementById('url-input').value;
+    // The form validation checks, if a url including protocol is submitted.
+    if (form.checkValidity() === false) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    if (form.checkValidity() === true) {
+      event.preventDefault();
+
+      // The spinner is shown to feedback the loading process.
+      // updateIndex.showSpinner();
+
+      postUserSelection().then((response) => console.log(response));
+
+      // If loading takes too long, a message is displayed.
+      // updateIndex.getLoadingMessage();
+    }
+    form.classList.add('was-validated');
+  });
 };
 
 /*
@@ -169,7 +179,7 @@ const submitInfo = () => {
 document.getElementById('city').addEventListener('keypress', (event) => {
   if (event.key === 'Enter') {
     console.log('Enter pressed.');
-    postUserSelection().then((response) => console.log(response));
+    submitInfo(event);
   }
 });
 
@@ -179,9 +189,29 @@ const inputCountry = () => {
 };
 
 // When the page is loaded the current date is set in the date input field.
-window.addEventListener('load', (event) => {
+window.addEventListener('load', () => {
   // document.getElementById('trip-date').value = getDate();
   document.getElementById('trip-date').valueAsDate = new Date();
+  let image = '';
+  const getHomePageImage = async () => {
+    const res = await fetch(queryLocalServer('/api/getHomePageImage'));
+    try {
+      image = await res.json();
+      console.log(`home page image id: ${image.imageId}`);
+      return image.imageId;
+    } catch (error) {
+      console.error('the following error occured: ', error.message);
+    }
+    return null;
+  };
+  // getHomePageImage();
+  // document.getElementById('hero').style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("./dist/cache/${image.imageId}.jpg");`;
+  // document.getElementById('hero').style.backgroundImage = `url("./dist/cache/${getHomePageImage()}.jpg")`;
+  // document.getElementById('hero').style.backgroundColor = 'red';
+  getHomePageImage().then((result) => {
+    console.log(result);
+    document.getElementById('hero').style.backgroundImage = `url("./dist/cache/${result}.jpg")`;
+  });
 });
 
 export { submitInfo };
