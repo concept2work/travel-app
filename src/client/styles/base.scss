@@ -1,13 +1,19 @@
 @import "variables";
 @import "fonts";
+@import "header";
+@import "footer";
 @import "~bootstrap/scss/bootstrap";
-@import "~uikit/src/scss/variables.scss";
-@import "~uikit/src/scss/mixins.scss";
-@import "~uikit/src/scss/uikit.scss";
 @import "open-weather-icons";
 
 html {
     font-size: 14px;
+    position: relative;
+    min-height: 100%;
+    hyphens: auto;
+}
+
+code {
+    font-size: 80%;
 }
 
 body {
@@ -21,106 +27,72 @@ body {
     hyphens: auto;
 }
 
+body > .container {
+    padding: 30px 15px 30px;
+}
+
 textarea {
     font-family: "Cabin", sans-serif;
 }
 
-.home-page-grid {
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    grid-template-areas:
-        "hd hd hd hd hd hd hd hd hd hd hd hd"
-        ". . . . ct ct ct ct . . . .";
+.jumbotron {
+    // color: white;
+    border-radius: 0;
+    // background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+    //     url("https://images.unsplash.com/photo-1438109491414-7198515b166b?q=80&fm=jpg&s=cbdabf7a79c087a0b060670a6d79726c");
+    height: 50vh;
 }
 
-@media screen and (max-width: 640px) {
-    .home-page-grid {
-        grid-template-areas:
-            "hd hd hd hd hd hd hd hd hd hd hd hd"
-            "ct ct ct ct ct ct ct ct ct ct ct ct";
+.jumbotron-image {
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+#main-heading {
+    padding-top: 30vh;
+}
+
+#generate {
+    width: 100%;
+}
+
+.nav-tabs-custom {
+    // border-bottom: $nav-tabs-border-width solid $nav-tabs-border-color;
+  
+    .nav-link {
+      margin-bottom: -$nav-tabs-border-width;
+    //   border: $nav-tabs-border-width solid transparent;
+      @include border-top-radius($nav-tabs-border-radius);
+  
+      @include hover-focus() {
+        border-color: $nav-tabs-link-hover-border-color;
+      }
+  
+      &.disabled {
+        color: $nav-link-disabled-color;
+        background-color: transparent;
+        border-color: transparent;
+      }
     }
-}
-@media screen and (min-width: 641px) and (max-width: 960px) {
-    .home-page-grid {
-        grid-template-areas:
-            "hd hd hd hd hd hd hd hd hd hd hd hd"
-            ". . . ct ct ct ct ct ct . . .";
+    
+    .nav-link.active {
+        border-bottom: $nav-tabs-border-width solid;
+        border-color:$white $black $black !important;
+        @include border-top-radius($nav-tabs-border-radius);
     }
-}
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-    color: var(--dark-black);
-    font-family: "Lato";
-    font-weight: bold;
-}
-
-header {
-    margin-left: var(--large-margin);
-    margin-right: var(--large-margin);
-    margin-top: var(--large-margin);
-}
-
-main {
-    margin-left: var(--large-margin);
-    margin-right: var(--large-margin);
-    margin-bottom: var(--large-margin);
-}
-
-.content {
-    grid-area: ct;
-}
-
-.main-header {
-    grid-area: hd;
-}
-
-.holder {
-    display: flex;
-    flex-direction: column;
-}
-
-.location {
-    display: flex;
-    flex-direction: row;
-}
-
-.uk-panel-box {
-    padding: var(--small-margin);
-    color: var(--light-black);
-    border: 1px solid var(--dark-grey);
-    border-radius: var(--border-radius);
-}
-
-.uk-button {
-    border-radius: var(--border-radius);
-}
-
-#name {
-    margin-top: 0;
-    margin-bottom: var(--extra-small-margin);
-}
-
-#icon {
-    font-size: 28px;
-    margin-right: 5px;
-    vertical-align: -5px;
-}
-
-#temp {
-    font-size: 24px;
-}
-
-#content {
-    padding-bottom: var(--extra-small-margin);
-}
-
-#entry-holder {
-    display: none;
-    padding-top: var(--extra-small-margin);
-    background-color: var(--light-grey);
-}
+    .nav-link.active,
+    .nav-item.show .nav-link {
+      color: $nav-tabs-link-active-color;
+      background-color: $nav-tabs-link-active-bg;
+      border-color: $nav-tabs-link-active-border-color;
+    }
+  
+    .dropdown-menu {
+      // Make dropdown border overlap tab border
+      margin-top: -$nav-tabs-border-width;
+      // Remove the top rounded corners here since there is a hard edge above the menu
+      @include border-top-radius(0);
+    }
+  }

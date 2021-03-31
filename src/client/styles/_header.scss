@@ -1,5 +1,17 @@
+
+
 nav {
-    background-color: $gray-100;
+    background-color: var(--light-grey);
+    
+}
+
+.navbar-brand {
+    background-image: url(../media/img/smart-vagabond-logo.svg);
+    background-repeat: no-repeat;
+    background-position: center; 
+    background-size: 250px;
+    width: 350px;
+    height: 60px;
 }
 
 .navbar-brand {
