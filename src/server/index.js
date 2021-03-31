@@ -120,6 +120,7 @@ const processUserInput = async (req, res) => {
     .then((response) => queryService.queryWeatherbit(response))
     .then((response) => queryService.queryDbPedia(response))
     .then((response) => queryService.queryPixabay(response))
+    // .then((response) => queryService.checkCache(response))
     .then((response) => res.send(response));
 };
 app.post('/api/postUserSelection', processUserInput);
@@ -137,10 +138,10 @@ const homePageImage = async (req, res) => {
     topic: 'city travel',
   };
   queryService.queryPixabay(image)
-    .then((response) => queryService.downloadFile(response))
-    .then((response) => queryService.downloadImage(response))
+    // .then((response) => queryService.downloadFile(response))
+    // .then((response) => res.send(response))
+    // .then((response) => console.log(`downloadFile response: ${response.imageId}`));
     .then((response) => res.send(response));
-  // .then((response) => console.log(`server response: ${response}`));
 };
 app.get('/api/getHomePageImage', homePageImage);
 

@@ -6,8 +6,6 @@ const fetch = require('node-fetch');
 // Todo: remove dependencies
 // const _ = require('lodash/core');
 
-const Axios = require('axios');
-
 // Modules required for image download
 const path = require('path');
 const fs = require('fs');
@@ -180,16 +178,16 @@ exports.queryPixabay = async (object = {}) => {
         Hotlinking of images is not allowed. Therefore the image is downloaded if it is
         not cached. A check via the image id is carried out.
       */
-      fs.access(`${dirPath}/${selectImage().id}.jpg`, fs.F_OK, (err) => {
-        // Solution adapted from Flavio Copes
-        // (https://flaviocopes.com/how-to-check-if-file-exists-node/)
-        if (err) {
-          download(selectImage().largeImageURL, `${dirPath}/${selectImage().id}.jpg`, () => {
-            console.log(`download of Pixabay image ${selectImage().largeImageURL} with the id ${selectImage().id}`);
-          });
-        }
-        // If the file already exists, nothing happens since the file is cached.
-      });
+      // fs.access(`${dirPath}/${selectImage().id}.jpg`, fs.F_OK, (err) => {
+      //   // Solution adapted from Flavio Copes
+      //   // (https://flaviocopes.com/how-to-check-if-file-exists-node/)
+      //   if (err) {
+      //     download(selectImage().largeImageURL, `${dirPath}/${selectImage().id}.jpg`, () => {
+      //       console.log(`download of Pixabay image ${selectImage().largeImageURL} with the id ${selectImage().id}`);
+      //     });
+      //   }
+      //   // If the file already exists, nothing happens since the file is cached.
+      // });
       // The image id is appended to the locationInfo object.
 
       locationInfo.imageId = selectImage().id;
@@ -208,31 +206,40 @@ exports.queryPixabay = async (object = {}) => {
   return null;
 };
 
-// exports.downloadFile = async (object = {}) => {
-//   // Todo: async function as explained in
-//   // https://dev.to/mrm8488/from-callbacks-to-fspromises-to-handle-the-file-system-in-nodejs-56p2
-//   // check https://gist.github.com/senthilmpro/072f5e69bdef4baffc8442c7e696f4eb
-//   console.log(`downloadFile function image id: ${object.imageId}`);
-//   const dirPath = path.join(`${process.cwd()}/dist`, '/cache');
-//   try {
-//     await fsp.access(`${dirPath}/${object.imageId}.jpg`, fs.F_OK, (err) => {
-//       // Solution adapted from Flavio Copes
-//       // (https://flaviocopes.com/how-to-check-if-file-exists-node/)
-//       if (!err) {
-//         download(object.largeImageURL, `${dirPath}/${object.imageId}.jpg`, () => {
-//           console.log(`download of Pixabay image async downloadFile ${object.largeImageURL} with the id ${object.imageId}`);
-//           console.log(`object.imageId: ${object.imageId}`);
-//           return object.imageId;
-//         });
-//       }
-
-//       // If the file already exists, nothing happens since the file is cached.
-//     });
-//   } catch (error) {
-//     console.error(error);
-//   }
-//   // return object;
-// };
+exports.downloadFile = async (object = {}) => {
+  // Todo: async function as explained in
+  // https://dev.to/mrm8488/from-callbacks-to-fspromises-to-handle-the-file-system-in-nodejs-56p2
+  // check https://gist.github.com/senthilmpro/072f5e69bdef4baffc8442c7e696f4eb
+  console.log(`downloadFile function called image id: ${object.imageId}`);
+  const dirPath = path.join(`${process.cwd()}/dist`, '/cache');
+  // try {
+  await fs.promises.access(`${dirPath}/${object.imageId}.jpg`, fs.F_OK, (err) => {
+    console.log('await called');
+    // Solution adapted from Flavio Copes
+    // (https://flaviocopes.com/how-to-check-if-file-exists-node/)
+    try {
+      if (err) {
+        console.log('!err called');
+        download(object.largeImageURL, `${dirPath}/${object.imageId}.jpg`, () => {
+          console.log(`download of Pixabay image async downloadFile ${object.largeImageURL} with the id ${object.imageId}`);
+          console.log(`object.imageId: ${object.imageId}`);
+          // return object.imageId;
+        });
+      }
+      if (!err) {
+        console.log('no error');
+        // return object.imageId;
+      }
+    } catch {
+      console.error(error);
+    }
+  });
+  // } catch (error) {
+  //   console.error(error);
+  // }
+  // return null;
+  return object;
+};
 
 // exports.downloadFile = async (object = {}) => {
 //   // Todo: async function as explained in
