@@ -1,4 +1,5 @@
-// import { Tooltip, Toast, Popover } from 'bootstrap';
+// import { Button, Carousel, Tab } from 'bootstrap';
+import 'bootstrap';
 // import 'bootstrap';
 // import 'jquery';
 // import 'jquery-ui';
@@ -7,7 +8,7 @@
 import { SparqlEndpointFetcher } from 'fetch-sparql-endpoint';
 
 import {
-  submitInfo, inputCountry, updateUI,
+  submitInfo, inputCountry,
 } from './js/formHandler';
 
 import {
