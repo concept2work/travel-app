@@ -3,7 +3,9 @@
 @import "header";
 @import "footer";
 @import "~bootstrap/scss/bootstrap";
-@import "open-weather-icons";
+@import "~weather-icons-sass/sass/weather-icons-variables";
+@import "~weather-icons-sass/sass/weather-icons-core";
+@import "~weather-icons-sass/sass/weather-icons-classes";
 
 html {
     font-size: 14px;
@@ -18,11 +20,10 @@ code {
 
 body {
     font-family: "Cabin", sans-serif;
-    background-color: var(--white);
-    color: var(--light-black);
+    background-color: $white;
+    color: $gray-900;
     font-weight: 400;
     margin: 0;
-    font-size: var(--main-font-size);
     line-height: 1.5;
     hyphens: auto;
 }
@@ -31,15 +32,19 @@ body > .container {
     padding: 30px 15px 30px;
 }
 
+h1 span { 
+  background-color: $primary;
+  padding: $table-cell-padding;
+  border-radius: $btn-border-radius;
+  text-transform: uppercase;
+}
+
 textarea {
     font-family: "Cabin", sans-serif;
 }
 
 .jumbotron {
-    // color: white;
     border-radius: 0;
-    // background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-    //     url("https://images.unsplash.com/photo-1438109491414-7198515b166b?q=80&fm=jpg&s=cbdabf7a79c087a0b060670a6d79726c");
     height: 50vh;
 }
 
@@ -57,12 +62,11 @@ textarea {
     width: 100%;
 }
 
+// Design of tabbed navigation
 .nav-tabs-custom {
-    // border-bottom: $nav-tabs-border-width solid $nav-tabs-border-color;
   
     .nav-link {
       margin-bottom: -$nav-tabs-border-width;
-    //   border: $nav-tabs-border-width solid transparent;
       @include border-top-radius($nav-tabs-border-radius);
   
       @include hover-focus() {
@@ -96,3 +100,36 @@ textarea {
       @include border-top-radius(0);
     }
   }
+
+// Design of accordion for trip details
+$accordion-padding-y:                     1rem;
+$accordion-padding-x:                     1.25rem;
+$accordion-color:                         $body-color;
+$accordion-bg:                            $body-bg;
+$accordion-border-width:                  $border-width;
+$accordion-border-color:                  rgba($black, .125);
+$accordion-border-radius:                 $border-radius;
+$accordion-inner-border-radius:           subtract($accordion-border-radius, $accordion-border-width);
+
+$accordion-body-padding-y:                $accordion-padding-y;
+$accordion-body-padding-x:                $accordion-padding-x;
+
+$accordion-button-padding-y:              $accordion-padding-y;
+$accordion-button-padding-x:              $accordion-padding-x;
+$accordion-button-color:                  $accordion-color;
+$accordion-button-bg:                     $accordion-bg;
+$accordion-transition:                    $btn-transition, border-radius .15s ease;
+$accordion-button-active-bg:              tint-color($component-active-bg, 90%);
+$accordion-button-active-color:           shade-color($primary, 10%);
+
+$accordion-button-focus-border-color:     $input-focus-border-color;
+$accordion-button-focus-box-shadow:       $btn-focus-box-shadow;
+
+$accordion-icon-width:                    1.25rem;
+$accordion-icon-color:                    $accordion-color;
+$accordion-icon-active-color:             $accordion-button-active-color;
+$accordion-icon-transition:               transform .2s ease-in-out;
+$accordion-icon-transform:                rotate(180deg);
+
+$accordion-button-icon:         url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='#{$accordion-icon-color}'><path fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/></svg>");
+$accordion-button-active-icon:  url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='#{$accordion-icon-active-color}'><path fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/></svg>");

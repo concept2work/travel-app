@@ -35,14 +35,3 @@
           /* Modern Browsers */ url("../media/fonts/lato-v17-latin-700.ttf") format("truetype"),
           /* Safari, Android, iOS */ url("../media/fonts/lato-v17-latin-700.svg#Lato") format("svg"); /* Legacy iOS */
 }
-
-@font-face {
-     font-family: WeatherIcons;
-     src: url("../media/fonts/WeatherIcons.eot");
-     src: url("../media/fonts/WeatherIcons.eot?#iefix") format("embedded-opentype"),
-          url("../media/fonts/WeatherIcons.woff2") format("woff2"), url("../media/fonts/WeatherIcons.woff") format("woff"),
-          url("../media/fonts/WeatherIcons.ttf") format("truetype"),
-          url("../media/fonts/WeatherIcons.svg#WeatherIcons") format("svg");
-     font-style: normal;
-     font-weight: 400;
-}
