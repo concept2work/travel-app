@@ -1,17 +1,14 @@
-// import { promises } from 'fs';
-
 // Node fetch is required to query the external API via fetch()
 const fetch = require('node-fetch');
 
-// Todo: remove dependencies
-// const _ = require('lodash/core');
-
-const axios = require('axios');
+// NLP library to process info texts
+const nlp = require('compromise');
+nlp.extend(require('compromise-sentences'));
 
 // Modules required for image download
 const path = require('path');
 const fs = require('fs');
-const request = require('request');
+const axios = require('axios');
 
 // Module to send queries to SPARQL endpoints, used to query DBpedia
 const { SparqlEndpointFetcher } = require('fetch-sparql-endpoint');
@@ -24,16 +21,6 @@ const logObject = (object = {}) => {
 };
 
 let locationInfo = {
-};
-
-// Function for downloading files
-// https://stackoverflow.com/questions/12740659/downloading-images-with-node-js
-const download = (uri, filename, callback) => {
-  request.head(uri, (err, res, body) => {
-    // console.log('content-type:', res.headers['content-type']);
-    // console.log('content-length:', res.headers['content-length']);
-    request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
-  });
 };
 
 /*
@@ -87,6 +74,8 @@ exports.queryDbPedia = async (object = {}) => {
       'SELECT DISTINCT', '?place ?abstract ?area ?population ?comment', 'LIMIT 1',
     ));
     data.on('data', (bindings) => {
+      // console.log(`bindings.abstract.value: ${bindings.abstract.value}`);
+      // console.log(`nlp: ${nlp(bindings.abstract.value).sentences().data()}`);
       locationInfo.abstract = bindings.abstract.value;
       if (bindings.comment) {
         locationInfo.comment = bindings.comment.value;
@@ -127,11 +116,8 @@ exports.queryPixabay = async (object = {}) => {
   const randomIntFromInterval = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
 
   try {
-    // The download path is set.
-    const dirPath = path.join(`${process.cwd()}/dist`, '/cache');
     // If the API sends OK, text information is returned.
     if (res.ok) {
-      // console.log(res.status);
       let response = await res.json();
 
       /*
@@ -140,7 +126,7 @@ exports.queryPixabay = async (object = {}) => {
       */
       if (object.city && object.countryName && response.totalHits === 0) {
         // console.log('no hits');
-        uri = `https://pixabay.com/api/?key=${apiKey}&q=${object.countryName}&editors_choice=true&category=travel&image_type=photo&orientation=horizontal&per_page=200`;
+        uri = `https://pixabay.com/api/?key=${apiKey}&q=${object.countryName}+flag&image_type=photo&orientation=horizontal&per_page=200`;
         console.log(`get country info from Pixabay API: ${encodeURI(uri)}`);
         res = await fetch(encodeURI(uri));
         response = await res.json();
@@ -148,25 +134,15 @@ exports.queryPixabay = async (object = {}) => {
 
       const pixabayImages = response.hits;
 
-      // Get a random image index number
+      // Getting a random number
       const randomIndexNumber = randomIntFromInterval(0, 200);
-      console.log(randomIndexNumber);
-
-      // let selectImage;
-
-      // console.log(pixabayImages[randomIndexNumber].id);
 
       /*
-        Getting the image with the most favorites. The solution to find
+        Getting the image with the most favorites (city and country search). The solution to find
         the image in the response object is adapted from senocular
         (https://www.reddit.com/r/javascript/comments/7xhjg9/es6_find_the_maximum_number_of_an_array_of_objects/).
+        Otherwise a random image is selected.
       */
-      // if (object.city && object.countryName) {
-      //   selectImage = () => (pixabayImages.reduce(
-      //     (max, image) => (max && max.favorites > image.favorites ? max : image), null,
-      //   ));
-      // }
-
       const selectImage = () => {
         if (object.city && object.countryName) {
           return (pixabayImages.reduce(
@@ -175,22 +151,6 @@ exports.queryPixabay = async (object = {}) => {
         }
         return pixabayImages[randomIndexNumber];
       };
-
-      /*
-        Hotlinking of images is not allowed. Therefore the image is downloaded if it is
-        not cached. A check via the image id is carried out.
-      */
-      // fs.access(`${dirPath}/${selectImage().id}.jpg`, fs.F_OK, (err) => {
-      //   // Solution adapted from Flavio Copes
-      //   // (https://flaviocopes.com/how-to-check-if-file-exists-node/)
-      //   if (err) {
-      //     download(selectImage().largeImageURL, `${dirPath}/${selectImage().id}.jpg`, () => {
-      //       console.log(`download of Pixabay image ${selectImage().largeImageURL} with the id ${selectImage().id}`);
-      //     });
-      //   }
-      //   // If the file already exists, nothing happens since the file is cached.
-      // });
-      // The image id is appended to the locationInfo object.
 
       locationInfo.imageId = selectImage().id;
       locationInfo.largeImageURL = selectImage().largeImageURL;
@@ -237,27 +197,6 @@ exports.downloadFile = async (object = {}) => {
   // pipe the result stream into a file on disc
   response.data.pipe(fs.createWriteStream(dirPath));
 
-  // fs.access(`${dirPath}/${imageId.id}.jpg`, fs.F_OK, (err) => {
-  //   if (!err) {
-  //     response.data.pipe(fs.createWriteStream(dirPath));
-  //   }
-  // });
-
-  // fs.access(`${dirPath}/${selectImage().id}.jpg`, fs.F_OK, (err) => {
-  //   // Solution adapted from Flavio Copes
-  //   // (https://flaviocopes.com/how-to-check-if-file-exists-node/)
-  //   if (err) {
-  //     // download(selectImage().largeImageURL, `${dirPath}/${selectImage().id}.jpg`, () => {
-  //     //   console.log(`download of Pixabay image ${selectImage().largeImageURL} with the id ${selectImage().id}`);
-  //     // });
-  //     const downloadPath = path.resolve(process.cwd(), 'dist/cache', `${selectImage().id}.jpg`);
-  //     response.data.pipe(fs.createWriteStream(downloadPath));
-  //   }
-  //   // If the file already exists, nothing happens since the file is cached.
-  // });
-  // The image id is appended to the locationInfo object.
-
-  // return a promise and resolve when download finishes
   return new Promise((resolve, reject) => {
     response.data.on('end', () => {
       console.log('resolved');
@@ -270,47 +209,6 @@ exports.downloadFile = async (object = {}) => {
     });
   });
 };
-
-// exports.downloadFile = async (object = {}) => {
-//   // Todo: async function as explained in
-//   // https://dev.to/mrm8488/from-callbacks-to-fspromises-to-handle-the-file-system-in-nodejs-56p2
-//   console.log(`downloadFile function image id: ${object.imageId}`);
-//   const dirPath = path.join(`${process.cwd()}/dist`, '/cache');
-//   // const writeStream = fs.createWriteStream(dirPath);
-//   fs.access(`${dirPath}/${object.imageId}.jpg`, fs.F_OK, (err) => {
-//   // Solution adapted from Flavio Copes
-//   // (https://flaviocopes.com/how-to-check-if-file-exists-node/)
-//     if (err) {
-//       download(object.largeImageURL, `${dirPath}/${object.imageId}.jpg`, () => {
-//         console.log(`download of Pixabay image ${object.largeImageURL} with the id ${object.imageId}`);
-//       });
-//     }
-//   // If the file already exists, nothing happens since the file is cached.
-//   });
-//   return object;
-//   // fs.access.on('finish', object.imageId);
-
-// // on finish event resolve the promise
-// // fs.access.on('finish', resolve);
-// };
-
-// exports.downloadFile = async (object = {}) => new Promise((resolve) => {
-//   const dirPath = path.join(`${process.cwd()}/dist`, '/cache');
-//   // const writeStream = fs.createWriteStream(dirPath);
-//   fs.access(`${dirPath}/${object.imageId}.jpg`, fs.F_OK, (err) => {
-//     // Solution adapted from Flavio Copes
-//     // (https://flaviocopes.com/how-to-check-if-file-exists-node/)
-//     if (err) {
-//       download(object.largeImageURL, `${dirPath}/${object.imageId}.jpg`, () => {
-//         console.log(`download of Pixabay image with ${object.largeImageURL} with the id ${object.imageId}`);
-//         resolve({ object });
-//       });
-//     }
-//     // If the file already exists, nothing happens since the file is cached.
-//   });
-//   // on finish event resolve the promise
-//   // fs.access.on('finish', resolve);
-// });
 
 /*
   Todo: adapt function for requirement If the trip is within a week, you will get the
@@ -372,12 +270,6 @@ exports.queryWeatherbit = async (object = {}) => {
   }
   return locationInfo;
 };
-
-/*
-  Todo: autocomplete:
-  https://stackoverflow.com/questions/17957390/how-to-use-jquery-autocomplete-with-node-js
-  https://gabrieleromanato.name/nodejs-autocomplete-in-expressjs-with-jquery-ui
-*/
 
 /*
     The data for the client is accumulated. In the first step the latitude and longitude
