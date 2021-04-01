@@ -12,7 +12,7 @@ import {
 } from './js/formHandler';
 
 import {
-  showSpinner, removeSpinner, resetView, updateResults,
+  showSpinner, removeSpinner, resetView,
 } from './js/updateIndex';
 
 import './styles/base.scss';
@@ -21,7 +21,6 @@ export {
   showSpinner,
   removeSpinner,
   resetView,
-  updateResults,
   submitInfo,
   inputCountry,
   SparqlEndpointFetcher,
