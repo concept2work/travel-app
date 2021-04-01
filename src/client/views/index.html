@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="author" content="Christian Westpfahl">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Smart Vagabond – City Guide</title>
+  <title>Smart Vagabond – City Guides</title>
 </head>
 
 <body class="d-flex flex-column min-vh-100">
@@ -14,82 +14,112 @@
     <nav class="navbar navbar-expand-sm">
       <div class="mx-auto d-sm-flex d-block flex-sm-nowrap">
         <a class="navbar-brand" href="#">
-          <span class="sr-only">Smart Vagabond – City Guide</span>
+          <span class="sr-only">Smart Vagabond – City Guides</span>
         </a>
       </div>
       </div>
     </nav>
-    <div id="hero" class="jumbotron text-white jumbotron-image shadow">
+    <div id="hero" class="jumbotron text-white jumbotron-image shadow mb-0">
       <div class="container">
         <div id="main-heading" class="col-12">
-          <h1 id="main-heading-contents">City guides for all the world</h1>
+          <h1>
+            <span id="main-heading-contents">City Guides</span>
+          </h1>
         </div>
       </div>
     </div>
   </header>
-  
-  <main role="main" class="container">
+
+  <main role="main" class="container mb-3">
 
     <div class="col-12">
       <ul class="nav nav-tabs-custom">
-        <li class="nav-item active"><a class="nav-link active" data-toggle="tab" href="#search">Search</a></li>
-        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#overview">Overview</a></li>
-        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#weather">Weather</a></li>
-        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#about">About CITY</a></li>
+        <li class="nav-item active" id="nav-item-search"><a class="nav-link active" data-toggle="tab"
+            href="#tab-item-search">Search</a></li>
+        <li class="nav-item" id="nav-item-overview"><a class="nav-link" data-toggle="tab"
+            href="#tab-item-overview">Overview</a></li>
+        <li class="nav-item" id="nav-item-trip"><a class="nav-link" data-toggle="tab" href="#tab-item-trip">My trip</a>
+        </li>
       </ul>
 
       <div class="tab-content">
-        <div id="search" class="tab-pane active mt-3">
+        <div id="tab-item-search" class="tab-pane active mt-3">
           <form class="row g-3 needs-validation" novalidate>
-            <div class="col-md-4 mt-3">
-              <label class="sr-only" for="country">Select country</label>
-                  <select class="custom-select" name="country" id="country" class="" onchange="Client.inputCountry()">
-                    <option value="">&mdash; USA is default, or choose your country &mdash;</option>
-                  </select>
+            <div class="col-md-4 mt-3 d-flex flex-column justify-content-end">
+              <label for="country">Select country</label>
+              <select class="custom-select" name="country" id="country" class="" onchange="Client.inputCountry()">
+                <option value="">&mdash; USA is default, or choose your country &mdash;</option>
+              </select>
             </div>
-            <div class="col-md-3 mt-3">
-                <label class="sr-only" for="city">Enter the city you want to visit</label>
-                <input class="form-control" type="text" id="city" required />
-                <div class="invalid-feedback">
-                  Please enter the name of a city
-              </div>
+            <div class="col-md-3 mt-3 d-flex flex-column justify-content-end">
+              <label for="city">Please enter the city you want to visit</label>
+              <input class="form-control" type="text" id="city" required placeholder="City" />
+              <div class="invalid-feedback">Please enter the name of a city</div>
             </div>
-            <div class="col-md-3 mt-3">
-              <label class="sr-only" for="date">Enter your travel date</label>
-                  <input class="form-control" type="date" id="trip-date" name="trip-date" value="2020-03-01" min=""
-                    max="" required>
+            <div class="col-md-3 mt-3 d-flex flex-column justify-content-end">
+              <label for="date">Enter your travel date</label>
+              <input class="form-control" type="date" id="trip-date" name="trip-date" value="" min="" max="" required>
             </div>
-            <div class="col-md-2 mt-3">
-              <button class="btn btn-primary" id="generate" type="submit" onclick="Client.submitInfo(event)">Search</button>
+            <div class="col-md-2 mt-3 d-flex flex-column justify-content-end">
+              <button class="btn btn-primary" id="generate" type="submit"
+                onclick="Client.submitInfo(event)">Search</button>
             </div>
           </form>
+          <div id="error" class="mt-3 alert alert-danger alert-dismissible fade show d-none" role="alert">
+            <p id="error-message" class="mb-0"></p>
+          </div>
         </div>
-        <div id="overview" class="tab-pane fade mt-4">
-          <div class="row">
+        <div id="tab-item-overview" class="tab-pane fade mt-4">
+          <div class="row justify-content-md-center">
             <div class="col-lg-8">
-              <p class="lead">Chicago ( (), locally also ), officially the City of Chicago, is the most populous city in the U.S. state of Illinois, and the third-most-populous city in the United States. With an estimated population of 2,693,976 in 2019, it is also the most populous city in the Midwestern United States. Chicago is the county seat of Cook County, the second-most-populous county in the US, with a small portion of the northwest side of the city extending into DuPage County near O'Hare Airport. Chicago is the principal city of the Chicago metropolitan area, often referred to as Chicagoland. At nearly 10 million people, the metropolitan area is the third most populous in the United States.
-              </p>
+              <p id="overview-content"></p>
             </div>
             <div class="col-lg-4">
               <div class="alert alert-primary" role="alert">
-                <dl class="row mb-0">
-                  <dt class="col-md-4">area</dt>
-                  <dd class="col-md-8">6.066e+08</dd>
-                  <dt class="col-md-4">population</dt>
-                  <dd class="col-md-8">2695598</dd>
+                <dl class="row mb-0" id="tab-item-facts">
                 </dl>
-              </div>  
+              </div>
             </div>
           </div>
         </div>
-        <div id="weather" class="tab-pane fade mt-4">
-          <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem
-            aperiam.</p>
-        </div>
-        <div id="about" class="tab-pane fade mt-4">
-          <div class="row justify-content-md-center">
-            <div class="col-lg-8">
-              <p>Chicago ( (), locally also ), officially the City of Chicago, is the most populous city in the U.S. state of Illinois, and the third-most-populous city in the United States. With an estimated population of 2,693,976 in 2019, it is also the most populous city in the Midwestern United States. Chicago is the county seat of Cook County, the second-most-populous county in the US, with a small portion of the northwest side of the city extending into DuPage County near O'Hare Airport. Chicago is the principal city of the Chicago metropolitan area, often referred to as Chicagoland. At nearly 10 million people, the metropolitan area is the third most populous in the United States. Located on the shores of freshwater Lake Michigan, Chicago was incorporated as a city in 1837 near a portage between the Great Lakes and the Mississippi River watershed and grew rapidly in the mid-19th century. After the Great Chicago Fire of 1871, which destroyed several square miles and left more than 100,000 homeless, the city made a concerted effort to rebuild. The construction boom accelerated population growth throughout the following decades, and by 1900, less than 30 years after the great fire, Chicago was the fifth-largest city in the world. Chicago made noted contributions to urban planning and zoning standards, including new construction styles (including the Chicago School of architecture), the development of the City Beautiful Movement, and the steel-framed skyscraper. Chicago is an international hub for finance, culture, commerce, industry, education, technology, telecommunications, and transportation. It is the site of the creation of the first standardized futures contracts, issued by the Chicago Board of Trade, which today is part of the largest and most diverse derivatives market in the world, generating 20% of all volume in commodities and financial futures alone. Depending on the particular year, the city's O'Hare International Airport is routinely ranked as the world's fifth or sixth busiest airport according to tracked data by the Airports Council International. The region also has the largest number of federal highways and is the nation's railroad hub. Chicago was listed as an alpha global city by the Globalization and World Cities Research Network, and it ranked seventh in the entire world in the 2017 Global Cities Index. The Chicago area has one of the highest gross domestic products (GDP) in the world, generating $689 billion in 2018. In addition, the city has one of the world's most diversified and balanced economies, with no single industry employing more than 14% of the workforce. Chicago is home to several Fortune 500 companies, including Allstate, Boeing, Caterpillar, Exelon, Kraft Heinz, McDonald's, Mondelez International, Sears, United Airlines Holdings, US Foods, and Walgreens. Chicago's 58 million domestic and international visitors in 2018 made it the second most visited city in the nation, as compared with New York City's 65 million visitors in 2018. The city was ranked first in the 2018 Time Out City Life Index, a global quality of life survey of 15,000 people in 32 cities. Landmarks in the city include Millennium Park, Navy Pier, the Magnificent Mile, the Art Institute of Chicago, Museum Campus, the Willis (Sears) Tower, Grant Park, the Museum of Science and Industry, and Lincoln Park Zoo. Chicago's culture includes the visual arts, literature, film, theatre, comedy (especially improvisational comedy), food, and music, particularly jazz, blues, soul, hip-hop, gospel, and electronic dance music including house music. Of the area's many colleges and universities, the University of Chicago, Northwestern University, and the University of Illinois at Chicago are classified as "highest research" doctoral universities. Chicago has professional sports teams in each of the major professional leagues, including two Major League Baseball teams.</p>
+        <div id="tab-item-trip" class="tab-pane fade mt-4">
+          <div class="row justify-content-lg-center">
+            <div id="accordion" class="col-lg-8">
+              <div class="card">
+                <div class="card-header" id="headingOne">
+                  <h2 class="mb-0">
+                    <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true"
+                      aria-controls="collapseOne">
+                      Details
+                    </button>
+                  </h2>
+                </div>
+                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                  <div id="trip-departure" class="card-body">
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-header" id="headingTwo">
+                  <h2 class="mb-0">
+                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo"
+                      aria-expanded="false" aria-controls="collapseTwo">
+                      Weather forecast
+                    </button>
+                  </h2>
+                </div>
+                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+                  <div class="card-body">
+                    <ul id="weather-forecast" class="list-group list-group-flush">
+                      <li class="list-group-item"><i class="wi wi-day-sunny"></i></li>
+                      <li class="list-group-item">Dapibus ac facilisis in</li>
+                      <li class="list-group-item">Morbi leo risus</li>
+                      <li class="list-group-item">Porta ac consectetur ac</li>
+                      <li class="list-group-item">Vestibulum at eros</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -100,11 +130,8 @@
         <span class="sr-only">Loading...</span>
       </div>
     </div>
-    <ul id="results" class="list-group mt-3">
-    </ul>
     </div>
   </main>
-
   <footer class="mt-auto d-flex align-items-center">
     <div class="container">
       <div class="col-12">
