@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
-import { updateUI } from './updateIndex';
-import { showSpinner } from './updateIndex';
-import { removeSpinner } from './updateIndex';
+import {
+  updateUI, showSpinner, removeSpinner, showErrorMessage, removeErrorMessage,
+} from './updateIndex';
 
 // Function that sets the whole server path to a relative API path
 const queryLocalServer = (path) => {
@@ -94,11 +94,21 @@ const submitInfo = (event) => {
     if (form.checkValidity() === true) {
       event.preventDefault();
       // The spinner is shown to feedback the loading process.
+      removeErrorMessage();
       showSpinner();
       postUserSelection()
-        .then((response) => {
-          updateUI(response);
-        });
+        .then(
+          (response) => {
+            if (!response.error) {
+              updateUI(response);
+            }
+            if (response.error) {
+              console.log(response);
+              removeSpinner();
+              showErrorMessage(response.error);
+            }
+          },
+        );
     }
     form.classList.add('was-validated');
   });
@@ -124,22 +134,28 @@ const inputCountry = () => {
 window.addEventListener('load', () => {
   // document.getElementById('trip-date').value = getDate();
   document.getElementById('trip-date').valueAsDate = new Date();
+  document.getElementById('main-heading-contents').innerHTML = 'City Guides';
+  // Todo: add dynamically
+  document.getElementById('nav-item-overview').classList.add('d-none');
+  document.getElementById('nav-item-trip').classList.add('d-none');
   let image = '';
   const getHomePageImage = async () => {
     const res = await fetch(queryLocalServer('/api/getHomePageImage'));
     try {
       image = await res.json();
       console.log(`home page image id: ${image.imageId}`);
-      return image.imageId;
+      return image;
     } catch (error) {
       console.error('the following error occured: ', error.message);
     }
     return null;
   };
-  getHomePageImage().then((result) => {
-    document.getElementById('hero').style.backgroundImage = `url("./dist/cache/${result}.jpg")`;
-    document.getElementById('main-heading-contents').innerHTML = 'City guides for all of the world';
-  });
+  getHomePageImage()
+    .then((result) => {
+      if (result.imageId) {
+        document.getElementById('hero').style.backgroundImage = `url("./dist/cache/${result.imageId}.jpg")`;
+      }
+    });
 });
 
 export { submitInfo };
