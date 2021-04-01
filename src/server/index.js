@@ -117,11 +117,17 @@ const processUserInput = async (req, res) => {
   await queryService.getGeoData(
     projectData.city, projectData.countryCode, projectData.date,
   )
+    .catch()
     .then((response) => queryService.queryWeatherbit(response))
+    .catch()
     .then((response) => queryService.queryDbPedia(response))
+    .catch()
     .then((response) => queryService.queryPixabay(response))
+    .catch()
     .then((response) => queryService.downloadFile(response))
-    .then((response) => res.send(response));
+    .catch()
+    .then((response) => res.send(response))
+    .catch(() => res.send({ error: 'No city with the entered name found.' }));
 };
 app.post('/api/postUserSelection', processUserInput);
 
