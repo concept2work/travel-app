@@ -7,6 +7,8 @@ const dotenv = require('dotenv').config({ path: './.env' });
 // const jquery = require('jquery');
 // require('jquery-ui-bundle');
 
+// Todo: create dist folder for image cache.
+
 module.exports = {
   entry: {
     entry: './src/client/index.js',
