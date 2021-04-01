@@ -1,15 +1,16 @@
-:root {
-    --transparent-white: rgba(255, 255, 255, 0.8);
-    --white: #fff;
-    --light-grey: #fafafa;
-    --dark-grey: #E5E5E5;
-    --light-black: #666;
-    --dark-black: #111;
-    --blue: #009cff;
-    --main-font-size: 16px;
-    --large-margin: 32px;
-    --small-margin: 16px;
-    --extra-small-margin: 8px;
-    --border-radius: 4px;
-    --box-shadow: 0 3px 5px 0 rgb(0 1 1 / 10%);
-}
+// Theme created with https://themestr.app/
+$primary:#FF550B;
+$secondary:#303030;
+$success:#015668;
+$danger:#FF304F;
+$info:#0F81C7;
+$warning:#0DE2EA;
+$light:#e8e8e8;
+$dark:#000000;
+$enable-gradients:false;
+$spacer:1rem;
+$border-width:1px;
+$btn-border-radius:.25rem;
+
+// Weather icons font path
+$wi-path: "../media/fonts";
