@@ -1,8 +1,3 @@
-// Todo: get icons from https://erikflowers.github.io/weather-icons/
-
-// The mappings are taken from yohaybn 
-// (https://github.com/yohaybn/weatherbit.io-codes-to-weather-icon-mapping)
-
 {
   "201": "wi-thunderstorm",
   "202": "wi-thunderstorm",

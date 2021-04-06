@@ -1,4 +1,12 @@
 /*
+  The weather icon mappings are taken from yohaybn
+  (https://github.com/yohaybn/weatherbit.io-codes-to-weather-icon-mapping).
+  With these it is possible to match the Weatherbit weather codes to
+  the Weather Icons font classes (https://github.com/erikflowers/weather-icons).
+*/
+import * as weatherIcons from './weather-icons-mapping.json';
+
+/*
   The following function that puts a new member into an array is adapted from Shidersz
   (https://stackoverflow.com/questions/54077062/insert-into-array-at-every-nth-position).
 */
@@ -15,52 +23,6 @@ const insertTokenEveryNthPosition = (arr, token, n, fromEnd) => {
   }
 
   return a;
-};
-
-/*
-  The weather icon mappings are taken from yohaybn
-  (https://github.com/yohaybn/weatherbit.io-codes-to-weather-icon-mapping).
-  With these it is possible to match the Weatherbit weather codes to
-  the Weather Icons font classes (https://github.com/erikflowers/weather-icons).
-*/
-const weatherIconsMapping = {
-  201: 'wi-thunderstorm',
-  202: 'wi-thunderstorm',
-  230: 'wi-storm-showers',
-  231: 'wi-storm-showers',
-  232: 'wi-storm-showers',
-  233: 'wi-thunderstorm',
-  300: 'wi-sprinkle',
-  301: 'wi-sprinkle',
-  302: 'wi-sprinkle',
-  500: 'wi-showers',
-  501: 'wi-showers',
-  502: 'wi-showers',
-  511: 'wi-showers',
-  520: 'wi-rain',
-  521: 'wi-rain',
-  522: 'wi-rain',
-  600: 'wi-snow',
-  601: 'wi-snow',
-  602: 'wi-snow',
-  610: 'wi-rain-mix',
-  611: 'wi-sleet',
-  612: 'wi-sleet',
-  621: 'wi-snow',
-  622: 'wi-snow',
-  623: 'wi-rain',
-  700: 'wi-fog',
-  711: 'wi-smoke',
-  721: 'wi-smog',
-  731: 'wi-dust',
-  741: 'wi-fog',
-  751: 'wi-fog',
-  800: 'wi-day-sunny',
-  801: 'wi-day-cloudy',
-  802: 'wi-day-cloudy',
-  803: 'wi-day-cloudy',
-  804: 'wi-cloudy',
-  900: 'wi-na',
 };
 
 const showErrorMessage = (error) => {
@@ -121,7 +83,7 @@ const updateUI = async (object = {}) => {
 
   const showWeather = () => {
     const weatherCode = object.forecast_0.code;
-    const weatherOne = weatherIconsMapping[`${weatherCode}`];
+    const weatherOne = weatherIcons[`${weatherCode}`];
     console.log(`weatherOne: ${weatherOne}`);
   };
   showWeather();
