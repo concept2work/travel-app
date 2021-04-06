@@ -98,7 +98,7 @@ const resetView = (elementId) => {
 
 const updateUI = async (object = {}) => {
   // Function to display the days until the trip starts.
-  const daysUntilTripMessage = () => {
+  const showDaysUntilTripMessage = () => {
     /*
       Date calculation adapted from trisweb
       (https://stackoverflow.com/questions/7763327/how-to-calculate-date-difference-in-javascript)
@@ -117,7 +117,14 @@ const updateUI = async (object = {}) => {
     }
     return null;
   };
-  document.getElementById('trip-departure').innerHTML = daysUntilTripMessage();
+  document.getElementById('trip-departure').innerHTML = showDaysUntilTripMessage();
+
+  const showWeather = () => {
+    const weatherCode = object.forecast_0.code;
+    const weatherOne = weatherIconsMapping[`${weatherCode}`];
+    console.log(`weatherOne: ${weatherOne}`);
+  };
+  showWeather();
 
   /*
     The background image of the hero is changed to the city image and the heading is
