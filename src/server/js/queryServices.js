@@ -77,6 +77,7 @@ exports.queryDbPedia = async (object = {}) => {
       // console.log(`bindings.abstract.value: ${bindings.abstract.value}`);
       // console.log(`nlp: ${nlp(bindings.abstract.value).sentences().data()}`);
       locationInfo.abstract = bindings.abstract.value;
+      locationInfo.abstractParsed = nlp(bindings.abstract.value).sentences().data();
       if (bindings.comment) {
         locationInfo.comment = bindings.comment.value;
       }
