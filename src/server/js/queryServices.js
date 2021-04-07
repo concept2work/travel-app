@@ -200,6 +200,7 @@ exports.downloadFile = async (object = {}) => {
 
   return new Promise((resolve, reject) => {
     response.data.on('end', () => {
+      console.log(`locationInfo.forecastMonth.month DL ${logObject(locationInfo)}`);
       console.log('resolved');
       resolve(locationInfo);
     });
@@ -217,8 +218,18 @@ exports.downloadFile = async (object = {}) => {
 */
 exports.queryWeatherbit = async (object = {}) => {
   const apiKey = process.env.WEATHERBIT_API_KEY;
-  // A 16 day forecast for the location is requested
-  const uri = `https://api.weatherbit.io/v2.0/forecast/daily?lat=${object.latitude}&lon=${object.longitude}&key=${apiKey}`;
+  let uri = '';
+
+  if (object.daysUntilTrip <= 16) {
+    // If the trip is within the next 16 days the forecast for the location is requested.
+    uri = `https://api.weatherbit.io/v2.0/forecast/daily?lat=${object.latitude}&lon=${object.longitude}&key=${apiKey}`;
+  }
+
+  if (object.daysUntilTrip > 16) {
+    // If the trip is later than 16 days the average weather data for the date is retrieved.
+    uri = `https://api.weatherbit.io/v2.0/normals?lat=${object.latitude}&lon=${object.longitude}&start_day=${object.date.slice(5)}&end_day=${object.date.slice(5)}&tp=monthly&key=${apiKey}`;
+  }
+
   const res = await fetch(encodeURI(uri));
   console.log(`get Info from Weatherbit API: ${uri}`);
   try {
@@ -226,39 +237,48 @@ exports.queryWeatherbit = async (object = {}) => {
     if (res.ok) {
       const response = await res.json();
 
+      if (object.daysUntilTrip <= 16) {
       // The daily forecasts are iterated and appended to the dailyForecast object.
-      const getDailyForecasts = () => {
-        const dailyForecast = {};
-        // eslint-disable-next-line no-restricted-syntax
-        for (const [i, forecastInfo] of response.data.entries()) {
-          dailyForecast[i] = {
-            date: forecastInfo.valid_date,
-            avg_temp: forecastInfo.temp,
-            temp_min: forecastInfo.app_min_temp,
-            temp_max: forecastInfo.app_max_temp,
-            pop: forecastInfo.pop,
-            uv: forecastInfo.uv,
-            code: forecastInfo.weather.code,
-            icon: forecastInfo.weather.icon,
-            description: forecastInfo.weather.description,
-          };
-        }
-        return dailyForecast;
-      };
+        const getDailyForecasts = () => {
+          const dailyForecast = {};
+          // eslint-disable-next-line no-restricted-syntax
+          for (const [i, forecastInfo] of response.data.entries()) {
+            dailyForecast[i] = {
+              date: forecastInfo.valid_date,
+              avg_temp: forecastInfo.temp,
+              temp_min: forecastInfo.app_min_temp,
+              temp_max: forecastInfo.app_max_temp,
+              pop: forecastInfo.pop,
+              uv: forecastInfo.uv,
+              code: forecastInfo.weather.code,
+              icon: forecastInfo.weather.icon,
+              description: forecastInfo.weather.description,
+            };
+          }
+          return dailyForecast;
+        };
 
-      // Adding the dailyForecast object to locationInfo
-      const getExtensiveForecast = () => {
-        Object.defineProperty(locationInfo, 'forecast', {
-          writable: true,
-          value: [],
-        });
-        // eslint-disable-next-line no-restricted-syntax
-        for (const [key, value] of Object.entries(getDailyForecasts())) {
-          locationInfo.forecast[`forecast_${key}`] = value;
-        }
-        Object.assign(locationInfo, locationInfo.forecast);
-      };
-      getExtensiveForecast();
+        // Adding the dailyForecast object to locationInfo
+        const getExtensiveForecast = () => {
+          locationInfo.forecastDays = {};
+          Object.assign(locationInfo, locationInfo.forecastDays);
+          // eslint-disable-next-line no-restricted-syntax
+          for (const [key, value] of Object.entries(getDailyForecasts())) {
+            locationInfo.forecastDays[`${key}`] = value;
+          }
+          Object.assign(locationInfo, locationInfo.forecast);
+        };
+        getExtensiveForecast();
+      }
+      if (object.daysUntilTrip > 16) {
+        locationInfo.forecastMonth = {};
+        locationInfo.forecastMonth.month = response.data[0].month;
+        locationInfo.forecastMonth.min_temp = response.data[0].min_temp;
+        locationInfo.forecastMonth.max_temp = response.data[0].max_temp;
+        locationInfo.forecastMonth.avg_temp = response.data[0].temp;
+        Object.assign(locationInfo, locationInfo.forecastMonth);
+        return locationInfo;
+      }
     }
     if (!res.ok) {
       const errorData = await res.json();
@@ -276,7 +296,7 @@ exports.queryWeatherbit = async (object = {}) => {
     The data for the client is accumulated. In the first step the latitude and longitude
     values from the submitted city are retrieved from the Geonames API.
   */
-exports.getGeoData = async (location, countryCode, date) => {
+exports.getGeoData = async (location, countryCode, date, daysUntilTrip) => {
   // Todo: Weather API in distinct function. Start promise chain in this function.
   // Geonames API options
   const userName = process.env.GEONAMES_USER;
@@ -300,6 +320,7 @@ exports.getGeoData = async (location, countryCode, date) => {
         longitude: response.geonames[0].lng,
         countryName: response.geonames[0].countryName,
         date,
+        daysUntilTrip,
       };
       return locationInfo;
     }
