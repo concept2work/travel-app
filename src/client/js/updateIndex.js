@@ -103,11 +103,11 @@ const updateUI = async (object = {}) => {
         const weatherInfo = `
       <li class="list-group-item">
         <div class="row">
-          <div class="col-md-2 mb-sm-1">${date.toDateString()}</div>
+          <div class="col-md-3 mb-sm-1">${date.toDateString()}</div>
           <div class="col-md-1 mb-sm-1"><i class="wi ${weatherIcons[`${object.forecastDays[i].code}`]}"></i></div>
-          <div class="col-md-2 mb-sm-1">${object.forecastDays[i].temp_min} °C</i> / ${object.forecastDays[i].temp_max} °C</div>
+          <div class="col-md-3 mb-sm-1">${object.forecastDays[i].temp_min} °C</i> / ${object.forecastDays[i].temp_max} °C</div>
           <div class="col-md-2 mb-sm-1"><i class="wi wi-raindrop"></i> ${object.forecastDays[i].pop}%</div>
-          <div class="col-md-5 mb-sm-1">${object.forecastDays[i].description}</div>
+          <div class="col-md-3 mb-sm-1">${object.forecastDays[i].description}</div>
         </div>
       </li>`;
         weatherList.insertAdjacentHTML('beforeend', weatherInfo);
