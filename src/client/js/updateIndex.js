@@ -1,5 +1,3 @@
-const $ = require('jquery');
-
 /*
   The weather icon mappings are taken from yohaybn
   (https://github.com/yohaybn/weatherbit.io-codes-to-weather-icon-mapping).
@@ -44,25 +42,6 @@ const weatherIcons = {
   803: 'wi-day-cloudy',
   804: 'wi-cloudy',
   900: 'wi-na',
-};
-
-/*
-  The following function that puts a new member into an array is adapted from Shidersz
-  (https://stackoverflow.com/questions/54077062/insert-into-array-at-every-nth-position).
-*/
-const insertTokenEveryNthPosition = (arr, token, n, fromEnd) => {
-  // The received array is cloned, so the original one is not mutated.
-  const a = arr.slice(0);
-
-  // The token is inserted every n elements.
-  let idx = fromEnd ? a.length - n : n;
-
-  while ((fromEnd ? idx >= 1 : idx <= a.length)) {
-    a.splice(idx, 0, token);
-    idx = (fromEnd ? idx - n : idx + n + 1);
-  }
-
-  return a;
 };
 
 const showErrorMessage = (error) => {
@@ -121,7 +100,6 @@ const updateUI = async (object = {}) => {
       for (let i = object.daysUntilTrip; i < (object.daysUntilTrip + 7); i += 1) {
         const weatherList = document.getElementById('weather-forecast');
         const date = new Date(object.forecastDays[i].date);
-        console.log(`i: ${i}`);
         const weatherInfo = `
       <li class="list-group-item">
         <div class="row">
@@ -169,14 +147,8 @@ const updateUI = async (object = {}) => {
   document.getElementById('tab-item-overview').classList.add('show');
   document.getElementById('nav-item-overview').classList.remove('d-none');
 
+  // If an abtract, i.e. facts about a city, it gets displayed.
   if (object.abstract) {
-  /*
-    Since the retrieved object is only one paragraph it can be hard to read if the text is longer.
-    Therefore some basic processing is performed. A regex expression, adapted from Larry Battle
-    (https://stackoverflow.com/questions/11761563/javascript-regexp-for-splitting-text-into-sentences-and-keeping-the-delimiter)
-    inserts sentences into an array. After that every 7th position two line breaks are inserted into
-    the array to get a better readability on the client.
-  */
     const accordionTripOverview = document.getElementById('accordionTripOverview');
     const accordionTripOverviewContent = `
     <div class="card" id="locationOverview">
@@ -192,21 +164,38 @@ const updateUI = async (object = {}) => {
           <div class="alert alert-primary float-md-left col-md-6 mr-md-3 col-lg-4" role="alert">
             <dl class="row mb-0" id="tab-item-facts" />
           </div>
-          <p id="overview-content" />
+          <p id="overview-content" class="mb-0" />
         </div>
       </div>
     </div>`;
+
+    // Adding the heading.
     accordionTripOverview.insertAdjacentHTML('beforeend', accordionTripOverviewContent);
     document.getElementById('accordion-heading-city').innerHTML = `About ${object.city}`;
-    const cityInfoProcessed = object.abstract.match(/[^\.!\?]+[\.!\?]+/g);
-    const cityInfo = insertTokenEveryNthPosition(cityInfoProcessed, '<br/><br/>', 10, true).join('');
-    document.getElementById('overview-content').innerHTML = cityInfo;
 
-    // The data os the overview tab gets inserted. Previously loaded data is removed.
+    // Previously shown facts are removed.
+    resetView('overview-content');
+
+    /*
+      Via server side NLP processing the retrieved facts are split into sentences.
+      These sentences are retrieved in the abstractParsed array. Each sentence is
+      put into a span element. Via CSS line breaks after a specified number of
+      sentences are set to improve readability of long contents.
+    */
+    const overviewContent = document.getElementById('overview-content');
+    for (let i = 0; i < object.abstractParsed.length; i += 1) {
+      overviewContent.insertAdjacentHTML('beforeend', `<span>${object.abstractParsed[i].text} </span>`);
+    }
+
+    // The data of the overview tab gets inserted. Previously loaded data is removed.
     resetView('tab-item-facts');
     document.getElementById('tab-item-facts').insertAdjacentHTML('beforeend', '<dt class="col-sm-4 col-lg-6">Country</dt>');
     document.getElementById('tab-item-facts').insertAdjacentHTML('beforeend', `<dd class="col-sm-8 col-lg-6">${object.countryName}</dd>`);
 
+    /*
+      Additional facts are possibly available for a city. In this case
+      they get displayed in a info box.
+    */
     if (object.area) {
       document.getElementById('tab-item-facts').insertAdjacentHTML('beforeend', '<dt class="col-sm-4 col-lg-6">City\'s area</dt>');
       document.getElementById('tab-item-facts').insertAdjacentHTML('beforeend', `<dd class="col-sm-8 col-lg-6">${parseInt((object.area / 1000000), 10).toLocaleString('en-US')} km<sup>2<sup></dd>`);
@@ -216,7 +205,10 @@ const updateUI = async (object = {}) => {
       document.getElementById('tab-item-facts').insertAdjacentHTML('beforeend', `<dd class="col-sm-8 col-lg-6">${parseInt(object.population, 10).toLocaleString('en-US')}</dd>`);
     }
   } else {
-    // If there is no abstract, the accordion element and its children are removed.
+    /*
+      If there is no abstract, the accordion element and its children are removed.
+      Solution adapted from Catalin Rosu (https://catalin.red/removing-an-element-with-plain-javascript-remove-method/).
+    */
     const locationOverview = document.getElementById('locationOverview');
     locationOverview.parentNode.removeChild(locationOverview);
   }
