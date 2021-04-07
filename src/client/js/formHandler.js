@@ -3,6 +3,8 @@ import {
   updateUI, showSpinner, removeSpinner, showErrorMessage, removeErrorMessage,
 } from './updateIndex';
 
+// const $ = require('jquery');
+
 // Function that sets the whole server path to a relative API path
 const queryLocalServer = (path) => {
   if (process.env.NODE_ENV === 'production') {
@@ -17,7 +19,7 @@ const queryLocalServer = (path) => {
 };
 
 /*
-  The user can select the country for the weather info. US is the standard selection.
+  The user can select the country for the travel info. US is the standard selection.
 */
 let selectedCountryCode = 'US';
 
@@ -49,14 +51,26 @@ const getCountries = async () => {
 };
 getCountries();
 
+const getDaysUntilTrip = (date) => {
+  /*
+    Date calculation adapted from trisweb
+    (https://stackoverflow.com/questions/7763327/how-to-calculate-date-difference-in-javascript)
+  */
+  const today = new Date().getTime();
+  const tripDate = new Date(date).getTime();
+  return (Math.floor(((tripDate - today) / (1000 * 60 * 60 * 24)) + 1));
+};
+
 const getInput = () => {
   userInput = {
     city: document.getElementById('city').value,
     countryCode: selectedCountryCode,
     date: document.getElementById('trip-date').value,
+    daysUntilTrip: getDaysUntilTrip(document.getElementById('trip-date').value),
   };
   console.log(`getInput.country: ${userInput.countryCode}`);
   console.log(`getInput.city: ${userInput.city}`);
+  console.log(`getInput.daysUntilTrip: ${userInput.daysUntilTrip}`);
   return userInput;
 };
 
@@ -136,8 +150,11 @@ window.addEventListener('load', () => {
   document.getElementById('trip-date').valueAsDate = new Date();
   document.getElementById('main-heading-contents').innerHTML = 'City Guides';
   // Todo: add dynamically
+
+  document.getElementById('home-link').setAttribute('href', queryLocalServer('/'));
+
   document.getElementById('nav-item-overview').classList.add('d-none');
-  document.getElementById('nav-item-trip').classList.add('d-none');
+  // document.getElementById('nav-item-trip').classList.add('d-none');
   let image = '';
   const getHomePageImage = async () => {
     const res = await fetch(queryLocalServer('/api/getHomePageImage'));
