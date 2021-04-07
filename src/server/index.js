@@ -39,6 +39,15 @@ dotenv.config();
 app.use('/open-weather-icons', express.static(`${__dirname}/node_modules/open-weather-icons/dist/`));
 
 /*
+  Creating dist folder if it does not exist yet.
+*/
+const distPath = path.join(`${process.cwd()}`, '/dist');
+// If the folder does not exist yet, it gets created.
+if (!fs.existsSync(distPath)) {
+  fs.mkdirSync(distPath);
+}
+
+/*
   Creating a cache folder for downloads from Pixabay.
 */
 const dirPath = path.join(`${process.cwd()}/dist`, '/cache');
