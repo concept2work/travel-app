@@ -13,7 +13,7 @@
   <header>
     <nav class="navbar navbar-expand-sm">
       <div class="mx-auto d-sm-flex d-block flex-sm-nowrap">
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" id="home-link" href="#">
           <span class="sr-only">Smart Vagabond – City Guides</span>
         </a>
       </div>
@@ -36,9 +36,8 @@
       <ul class="nav nav-tabs-custom">
         <li class="nav-item active" id="nav-item-search"><a class="nav-link active" data-toggle="tab"
             href="#tab-item-search">Search</a></li>
-        <li class="nav-item" id="nav-item-overview"><a class="nav-link" data-toggle="tab"
-            href="#tab-item-overview">Overview</a></li>
-        <li class="nav-item" id="nav-item-trip"><a class="nav-link" data-toggle="tab" href="#tab-item-trip">My trip</a>
+        <li class="nav-item" id="nav-item-overview"><a class="nav-link" data-toggle="tab" href="#tab-item-overview">My
+            trip</a></li>
         </li>
       </ul>
 
@@ -69,69 +68,58 @@
             <p id="error-message" class="mb-0"></p>
           </div>
         </div>
+
         <div id="tab-item-overview" class="tab-pane fade mt-4">
-          <div class="row justify-content-md-center">
-            <div class="col-lg-8">
-              <p id="overview-content"></p>
-            </div>
-            <div class="col-lg-4">
-              <div class="alert alert-primary" role="alert">
-                <dl class="row mb-0" id="tab-item-facts">
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div id="tab-item-trip" class="tab-pane fade mt-4">
           <div class="row justify-content-lg-center">
-            <div id="accordion" class="col-lg-8">
-              <div class="card">
-                <div class="card-header" id="headingOne">
-                  <h2 class="mb-0">
-                    <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true"
-                      aria-controls="collapseOne">
-                      Details
-                    </button>
-                  </h2>
-                </div>
-                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
-                  <div id="trip-departure" class="card-body">
+            <div class="col-lg-8 col-md-12">
+
+              <div id="accordionTripOverview" class="accordion">
+
+                <div class="card">
+                  <div id="headingDaysUntilTrip" class="card-header bg-white">
+                    <h2 class="mb-0 font-weight-bold"><a href="#" data-toggle="collapse"
+                        data-target="#collapseDaysUntilTrip" aria-expanded="true" aria-controls="collapseDaysUntilTrip"
+                        class="d-block position-relative text-dark collapsible-link py-2 h5">Start</a>
+                    </h2>
+                  </div>
+                  <div id="collapseDaysUntilTrip" aria-labelledby="headingDaysUntilTrip"
+                    data-parent="#accordionTripOverview" class="collapse show">
+                    <div id="trip-departure" class="card-body">
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="card">
-                <div class="card-header" id="headingTwo">
-                  <h2 class="mb-0">
-                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo"
-                      aria-expanded="false" aria-controls="collapseTwo">
-                      Weather forecast
-                    </button>
-                  </h2>
-                </div>
-                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
-                  <div class="card-body">
-                    <ul id="weather-forecast" class="list-group list-group-flush">
-                      <li class="list-group-item"><i class="wi wi-day-sunny"></i></li>
-                      <li class="list-group-item">Dapibus ac facilisis in</li>
-                      <li class="list-group-item">Morbi leo risus</li>
-                      <li class="list-group-item">Porta ac consectetur ac</li>
-                      <li class="list-group-item">Vestibulum at eros</li>
-                    </ul>
+
+                <div class="card">
+                  <div id="headingWeatherForecast" class="card-header bg-white">
+                    <h2 class="mb-0 font-weight-bold"><a href="#" data-toggle="collapse"
+                        data-target="#collapseWeatherForecast" aria-expanded="false"
+                        aria-controls="collapseWeatherForecast"
+                        class="d-block position-relative collapsed text-dark collapsible-link py-2 h5">Weather
+                        Forecast</a></h2>
+                  </div>
+                  <div id="collapseWeatherForecast" aria-labelledby="headingWeatherForecast" class="collapse">
+                    <div class="card-body">
+                      <ul id="weather-forecast" class="list-group list-group-flush">
+                      </ul>
+                    </div>
                   </div>
                 </div>
+
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+
     <div id="loading-status" class="d-none">
-      <div class="spinner-border" role="status">
+      <div class="spinner-border text-primary" role="status">
         <span class="sr-only">Loading...</span>
       </div>
     </div>
-    </div>
+
   </main>
+
   <footer class="mt-auto d-flex align-items-center">
     <div class="container">
       <div class="col-12">
@@ -139,6 +127,7 @@
       </div>
     </div>
   </footer>
+
 </body>
 
 </html>
