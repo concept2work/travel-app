@@ -108,14 +108,16 @@ app.get('/', (req, res, next) => {
   the projectData object is updated with that information.
 */
 const processUserInput = async (req, res) => {
+  console.log(`daysUntilTrip: ${req.body.daysUntilTrip}`);
   projectData = {
     city: req.body.city,
     countryCode: req.body.countryCode,
     date: req.body.date,
     preferredLanguage: req.body.preferredLanguage,
+    daysUntilTrip: req.body.daysUntilTrip,
   };
   await queryService.getGeoData(
-    projectData.city, projectData.countryCode, projectData.date,
+    projectData.city, projectData.countryCode, projectData.date, projectData.daysUntilTrip,
   )
     .catch()
     .then((response) => queryService.queryWeatherbit(response))
@@ -127,7 +129,10 @@ const processUserInput = async (req, res) => {
     .then((response) => queryService.downloadFile(response))
     .catch()
     .then((response) => res.send(response))
-    .catch(() => res.send({ error: 'No city with the entered name found.' }));
+    .catch((error) => {
+      console.error('the following error occured: ', error.message);
+      return res.send({ error: 'There was an internal server error.' });
+    });
 };
 app.post('/api/postUserSelection', processUserInput);
 
@@ -146,13 +151,3 @@ const homePageImage = async (req, res) => {
     .then((response) => res.send(response));
 };
 app.get('/api/getHomePageImage', homePageImage);
-
-/*
-  Handling of the data that was collected
-  from the different APIs.
-*/
-const postApiData = (req, res) => {
-  console.log(req.body);
-  projectData = req.body;
-};
-app.post('/api/postApiData', postApiData);
