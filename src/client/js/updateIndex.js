@@ -149,6 +149,13 @@ const updateUI = async (object = {}) => {
 
   // If an abtract, i.e. facts about a city, it gets displayed.
   if (object.abstract) {
+    // Previously shown facts are removed.
+    // resetView('overview-content');
+    const locationOverview = document.getElementById('locationOverview');
+    if (locationOverview) {
+      locationOverview.parentNode.removeChild(locationOverview);
+    }
+
     const accordionTripOverview = document.getElementById('accordionTripOverview');
     const accordionTripOverviewContent = `
     <div class="card" id="locationOverview">
@@ -172,9 +179,6 @@ const updateUI = async (object = {}) => {
     // Adding the heading.
     accordionTripOverview.insertAdjacentHTML('beforeend', accordionTripOverviewContent);
     document.getElementById('accordion-heading-city').innerHTML = `About ${object.city}`;
-
-    // Previously shown facts are removed.
-    resetView('overview-content');
 
     /*
       Via server side NLP processing the retrieved facts are split into sentences.
@@ -210,7 +214,9 @@ const updateUI = async (object = {}) => {
       Solution adapted from Catalin Rosu (https://catalin.red/removing-an-element-with-plain-javascript-remove-method/).
     */
     const locationOverview = document.getElementById('locationOverview');
-    locationOverview.parentNode.removeChild(locationOverview);
+    if (locationOverview) {
+      locationOverview.parentNode.removeChild(locationOverview);
+    }
   }
 
   // The loading spinner is removed.
