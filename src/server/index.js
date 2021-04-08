@@ -118,10 +118,12 @@ app.get('/', (req, res, next) => {
 */
 const processUserInput = async (req, res) => {
   console.log(`daysUntilTrip: ${req.body.daysUntilTrip}`);
+  // Date from date picker is formatted
+  const dateFormatted = new Date(req.body.date).toISOString().slice(0, -14);
   projectData = {
     city: req.body.city,
     countryCode: req.body.countryCode,
-    date: req.body.date,
+    date: dateFormatted,
     preferredLanguage: req.body.preferredLanguage,
     daysUntilTrip: req.body.daysUntilTrip,
   };
