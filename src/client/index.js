@@ -1,9 +1,4 @@
-// import { Button, Carousel, Tab } from 'bootstrap';
 import 'bootstrap';
-// import 'bootstrap';
-// import 'jquery';
-// import 'jquery-ui';
-// import 'jquery-autocomplete';
 
 import { SparqlEndpointFetcher } from 'fetch-sparql-endpoint';
 
