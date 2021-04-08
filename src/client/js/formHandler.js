@@ -1,9 +1,17 @@
 /* eslint-disable max-len */
+
+/*
+  Added datepicker library to get this functionality in all browsers
+  instead of using the HTML element input with the attribute type="date".
+*/
+import datepicker from 'js-datepicker';
+
 import {
   updateUI, showSpinner, removeSpinner, showErrorMessage, removeErrorMessage,
 } from './updateIndex';
 
 // const $ = require('jquery');
+const getToday = () => new Date();
 
 // Function that sets the whole server path to a relative API path
 const queryLocalServer = (path) => {
@@ -56,9 +64,8 @@ const getDaysUntilTrip = (date) => {
     Date calculation adapted from trisweb
     (https://stackoverflow.com/questions/7763327/how-to-calculate-date-difference-in-javascript)
   */
-  const today = new Date().getTime();
   const tripDate = new Date(date).getTime();
-  return (Math.floor(((tripDate - today) / (1000 * 60 * 60 * 24)) + 1));
+  return (Math.floor(((tripDate - getToday().getTime()) / (1000 * 60 * 60 * 24)) + 1));
 };
 
 const getInput = () => {
@@ -146,11 +153,17 @@ const inputCountry = () => {
 
 // When the page is loaded the current date is set in the date input field.
 window.addEventListener('load', () => {
-  // document.getElementById('trip-date').value = getDate();
-  document.getElementById('trip-date').valueAsDate = new Date();
-  document.getElementById('main-heading-contents').innerHTML = 'City Guides';
-  // Todo: add dynamically
+  // Date picker is added.
+  const tripDate = datepicker('#trip-date', {
+    minDate: getToday(),
+    dateSelected: getToday(),
+    position: 'tl',
+  });
 
+  // Heading is added.
+  document.getElementById('main-heading-contents').innerHTML = 'City Guides';
+
+  // Home link to logo is set.
   document.getElementById('home-link').setAttribute('href', queryLocalServer('/'));
 
   document.getElementById('nav-item-overview').classList.add('d-none');
