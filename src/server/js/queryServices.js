@@ -220,12 +220,12 @@ exports.queryWeatherbit = async (object = {}) => {
   const apiKey = process.env.WEATHERBIT_API_KEY;
   let uri = '';
 
-  if (object.daysUntilTrip <= 16) {
+  if (object.daysUntilTrip <= 15) {
     // If the trip is within the next 16 days the forecast for the location is requested.
     uri = `https://api.weatherbit.io/v2.0/forecast/daily?lat=${object.latitude}&lon=${object.longitude}&key=${apiKey}`;
   }
 
-  if (object.daysUntilTrip > 16) {
+  if (object.daysUntilTrip > 15) {
     /*
       If the trip is later than 16 days the average weather data for the date is retrieved.
       The date is adjusted to match the API's requirements.
@@ -240,7 +240,7 @@ exports.queryWeatherbit = async (object = {}) => {
     if (res.ok) {
       const response = await res.json();
 
-      if (object.daysUntilTrip <= 16) {
+      if (object.daysUntilTrip <= 15) {
       // The daily forecasts are iterated and appended to the dailyForecast object.
         const getDailyForecasts = () => {
           const dailyForecast = {};
@@ -273,7 +273,7 @@ exports.queryWeatherbit = async (object = {}) => {
         };
         getExtensiveForecast();
       }
-      if (object.daysUntilTrip > 16) {
+      if (object.daysUntilTrip > 15) {
         locationInfo.forecastMonth = {};
         locationInfo.forecastMonth.month = response.data[0].month;
         locationInfo.forecastMonth.min_temp = response.data[0].min_temp;

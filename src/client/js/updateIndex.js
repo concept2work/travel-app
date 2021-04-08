@@ -95,11 +95,15 @@ const updateUI = async (object = {}) => {
 
   const showWeatherData = () => {
     if (object.daysUntilTrip < 16) {
-      // Display the weather forecast for one week maximum.
+      /*
+        Display the weather forecast. The maximum of days that can be retrieved via the API is 16,
+        in the array that is 0-15.
+      */
       resetView('weather-forecast');
-      for (let i = object.daysUntilTrip; i < (object.daysUntilTrip + 7); i += 1) {
+      for (let i = object.daysUntilTrip; i < 16; i += 1) {
         const weatherList = document.getElementById('weather-forecast');
         // Todo: check that date is not in the past.
+        console.log(object.forecastDays[i].date);
         const date = new Date(object.forecastDays[i].date);
         const weatherInfo = `
       <li class="list-group-item">
