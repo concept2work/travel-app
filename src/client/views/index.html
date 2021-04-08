@@ -46,18 +46,19 @@
           <form class="row g-3 needs-validation" novalidate>
             <div class="col-md-4 mt-3 d-flex flex-column justify-content-end">
               <label for="country">Select country</label>
-              <select class="custom-select" name="country" id="country" class="" onchange="Client.inputCountry()">
+              <select class="custom-select" name="country" id="country" onchange="Client.inputCountry()">
                 <option value="">&mdash; USA is default, or choose your country &mdash;</option>
               </select>
             </div>
             <div class="col-md-3 mt-3 d-flex flex-column justify-content-end">
-              <label for="city">Please enter the city you want to visit</label>
+              <label for="city">Enter the city you want to visit</label>
               <input class="form-control" type="text" id="city" required placeholder="City" />
               <div class="invalid-feedback">Please enter the name of a city</div>
             </div>
             <div class="col-md-3 mt-3 d-flex flex-column justify-content-end">
               <label for="date">Enter your travel date</label>
-              <input class="form-control" type="date" id="trip-date" name="trip-date" value="" min="" max="" required>
+              <input class="form-control" id="trip-date" required>
+              <div class="invalid-feedback">Please enter a date</div>
             </div>
             <div class="col-md-2 mt-3 d-flex flex-column justify-content-end">
               <button class="btn btn-primary" id="generate" type="submit"
