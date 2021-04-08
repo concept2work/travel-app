@@ -183,7 +183,12 @@ window.addEventListener('load', () => {
   getHomePageImage()
     .then((result) => {
       if (result.imageId) {
-        document.getElementById('hero').style.backgroundImage = `url("./dist/cache/${result.imageId}.jpg")`;
+        if (process.env.NODE_ENV === 'production') {
+          document.getElementById('hero').style.backgroundImage = `url("./cache/${result.imageId}.jpg")`;
+        }
+        if (process.env.NODE_ENV === 'development') {
+          document.getElementById('hero').style.backgroundImage = `url("./dist/cache/${result.imageId}.jpg")`;
+        }
       } else {
         showErrorMessage(result.error);
         document.getElementById('hero').style.backgroundImage = '';

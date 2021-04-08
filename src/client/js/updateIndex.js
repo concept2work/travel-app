@@ -135,7 +135,13 @@ const updateUI = async (object = {}) => {
     The background image of the hero is changed to the city image and the heading is
     changed to the city's name.
   */
-  document.getElementById('hero').style.backgroundImage = `url("./dist/cache/${object.imageId}.jpg")`;
+  if (process.env.NODE_ENV === 'production') {
+    document.getElementById('hero').style.backgroundImage = `url("./cache/${object.imageId}.jpg")`;
+  }
+  if (process.env.NODE_ENV === 'development') {
+    document.getElementById('hero').style.backgroundImage = `url("./dist/cache/${object.imageId}.jpg")`;
+  }
+
   document.getElementById('main-heading-contents').innerHTML = `${object.city}`;
 
   // Switching to the overview tab is prepared by removing the active classes of the search.
