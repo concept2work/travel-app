@@ -1,7 +1,5 @@
-/* eslint-disable max-len */
-
 /*
-  Added datepicker library to get this functionality in all browsers
+  The datepicker library is added to get a consistent functionality in all browsers
   instead of using the HTML element input with the attribute type="date".
 */
 import datepicker from 'js-datepicker';
@@ -10,7 +8,6 @@ import {
   updateUI, showSpinner, removeSpinner, showErrorMessage, removeErrorMessage,
 } from './updateIndex';
 
-// const $ = require('jquery');
 const getToday = () => new Date();
 
 // Function that sets the whole server path to a relative API path
@@ -26,12 +23,8 @@ const queryLocalServer = (path) => {
   return null;
 };
 
-/*
-  The user can select the country for the travel info. US is the standard selection.
-*/
+// The user can select the country for the travel info. US is the standard selection.
 let selectedCountryCode = 'US';
-
-let userInput = {};
 
 /*
   The language selector is populated by the values  of the languages object
@@ -69,18 +62,16 @@ const getDaysUntilTrip = (date) => {
 };
 
 const getInput = () => {
-  userInput = {
+  const userInput = {
     city: document.getElementById('city').value,
     countryCode: selectedCountryCode,
     date: document.getElementById('trip-date').value,
     daysUntilTrip: getDaysUntilTrip(document.getElementById('trip-date').value),
   };
-  console.log(`getInput.country: ${userInput.countryCode}`);
-  console.log(`getInput.city: ${userInput.city}`);
-  console.log(`getInput.daysUntilTrip: ${userInput.daysUntilTrip}`);
   return userInput;
 };
 
+// The user input is sent to the server. On the server side the APIs are queried.
 const postUserSelection = async () => {
   const settings = {
     method: 'POST',
@@ -104,9 +95,12 @@ const postUserSelection = async () => {
 const submitInfo = (event) => {
   // If a result is already shown the view gets reset.
   const forms = document.getElementsByClassName('needs-validation');
+  /*
+    The following function validates user input and carries out feedback if the input
+    is not valid. This function is adapted from the Bootstrap Starter code
+    (https://getbootstrap.com/docs/4.6/components/forms/#validation).
+  */
   Array.prototype.filter.call(forms, (form) => {
-    // const apiRequestUrl = document.getElementById('url-input').value;
-    // The form validation checks, if a url including protocol is submitted.
     if (form.checkValidity() === false) {
       event.preventDefault();
       event.stopPropagation();
@@ -118,6 +112,7 @@ const submitInfo = (event) => {
       showSpinner();
       postUserSelection()
         .then(
+          // After getting a response from the server the data is processed.
           (response) => {
             if (!response.error) {
               updateUI(response);
@@ -135,7 +130,7 @@ const submitInfo = (event) => {
 };
 
 /*
-  Event listener that checks if the Enter button in zip input is used to confirm.
+  Event listener that checks if the Enter button is used to confirm input.
   The input is validated, if the zip is valid the Weather API is queried.
 */
 document.getElementById('city').addEventListener('keypress', (event) => {
@@ -151,9 +146,9 @@ const inputCountry = () => {
   console.log(selectedCountryCode);
 };
 
-// When the page is loaded the current date is set in the date input field.
+// When the page is loaded the content gets updated.
 window.addEventListener('load', () => {
-  // Date picker is added.
+  // Datepicker is added. When the page is loaded the current date is set in the date input field.
   const tripDate = datepicker('#trip-date', {
     minDate: getToday(),
     dateSelected: getToday(),
@@ -175,7 +170,6 @@ window.addEventListener('load', () => {
     const res = await fetch(queryLocalServer('/api/getHomePageImage'));
     try {
       image = await res.json();
-      // console.log(`home page image id: ${image.imageId}`);
       return image;
     } catch (error) {
       console.error('the following error occured: ', error.message);
