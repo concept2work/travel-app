@@ -99,6 +99,7 @@ const updateUI = async (object = {}) => {
       resetView('weather-forecast');
       for (let i = object.daysUntilTrip; i < (object.daysUntilTrip + 7); i += 1) {
         const weatherList = document.getElementById('weather-forecast');
+        // Todo: check that date is not in the past.
         const date = new Date(object.forecastDays[i].date);
         const weatherInfo = `
       <li class="list-group-item">
