@@ -13,33 +13,19 @@ const axios = require('axios');
 // Module to send queries to SPARQL endpoints, used to query DBpedia
 const { SparqlEndpointFetcher } = require('fetch-sparql-endpoint');
 
-const logObject = (object = {}) => {
-  // eslint-disable-next-line no-restricted-syntax
-  for (const [key, value] of Object.entries(object)) {
-    console.log(`${key}: ${value}`);
-  }
-};
-
+// An empty JS object acts as a container for the retrieved data.
 let locationInfo = {
 };
 
 /*
   DBpedia is queried for additional information. DBpedia provides a SPARQL endpoint
-  which is queried with the help of the fetch-sparql-endpoint library. As additional
-  information the full abstract of a city's Wikipedia article is tried to retrieve.
-  Via the latitude and longitude values the suiting article information is going to be
-  queried. For this procedure two steps are neccessary. In the first step a ASK query
-  is run that returns true or false for the query. Only if true is returned, the
-  SELECT DISTINCT query is run that returns specific data.
+  which is queried with the help of the fetch-sparql-endpoint library. The article of
+  a city is tried to retrieve via the latitude and longitude values that are provided
+  by the Geonames API. The coordinates get adjusted since they do not match exactly
+  the values in DBpedia. Therefore a range is set via various FILTER settings in the
+  SPARQL query.
 */
-// Todo: read values from object
 exports.queryDbPedia = async (object = {}) => {
-  /*
-    The article of a city is tried to retrieve via the latitude and longitude values
-    that are provided by the Geonames API. The coordinates get adjusted since they do
-    not match exactly the values in DBpedia. Therefore a range is set via various FILTER
-    settings in the SPARQL query.
-  */
   const { longitude } = object;
   const { latitude } = object;
   const { city } = object;
@@ -49,7 +35,8 @@ exports.queryDbPedia = async (object = {}) => {
   const latLess = parseFloat(latitude) - 0.25;
   const latMore = parseFloat(latitude) + 0.25;
   const fetcher = new SparqlEndpointFetcher();
-  const sparqlQuery = (queryType, queryTypeSuffix, queryLimit) => `PREFIX : <http://dbpedia.org/resource/>
+  const sparqlQuery = (queryType, queryTypeSuffix, queryLimit) => `
+  PREFIX : <http://dbpedia.org/resource/>
   ${queryType} ${queryTypeSuffix}
   WHERE {
     VALUES ?cityType { schema:City wikidata:Q486972 dbo:City } 
@@ -74,9 +61,11 @@ exports.queryDbPedia = async (object = {}) => {
       'SELECT DISTINCT', '?place ?abstract ?area ?population ?comment', 'LIMIT 1',
     ));
     data.on('data', (bindings) => {
-      // console.log(`bindings.abstract.value: ${bindings.abstract.value}`);
-      // console.log(`nlp: ${nlp(bindings.abstract.value).sentences().data()}`);
       locationInfo.abstract = bindings.abstract.value;
+      /*
+        NLP processing is carried out to separate the sentences of the abstract.
+        This way CSS styling can be carried out via the client.
+      */
       locationInfo.abstractParsed = nlp(bindings.abstract.value).sentences().data();
       if (bindings.comment) {
         locationInfo.comment = bindings.comment.value;
@@ -98,6 +87,10 @@ exports.queryDbPedia = async (object = {}) => {
   return null;
 };
 
+/*
+  Pixabay is queried two times: firstly for getting a home page image, and secondly if the
+  user searches for a city. Therefore the queried URLs vary.
+*/
 exports.queryPixabay = async (object = {}) => {
   const apiKey = process.env.PIXABAY_API_KEY;
   let uri;
@@ -113,7 +106,11 @@ exports.queryPixabay = async (object = {}) => {
   let res = await fetch(encodeURI(uri));
   console.log(`get image from Pixabay API: ${encodeURI(uri)}`);
 
-  // https:// stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript
+  /*
+    The following function to get a random number from an interval is adapted from
+    Francisc and jonschlinkert
+    (https://stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript).
+  */
   const randomIntFromInterval = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
 
   try {
@@ -126,7 +123,6 @@ exports.queryPixabay = async (object = {}) => {
         the country is carried out.
       */
       if (object.city && object.countryName && response.totalHits === 0) {
-        // console.log('no hits');
         uri = `https://pixabay.com/api/?key=${apiKey}&q=${object.countryName}+flag&image_type=photo&orientation=horizontal&per_page=200`;
         console.log(`get country info from Pixabay API: ${encodeURI(uri)}`);
         res = await fetch(encodeURI(uri));
@@ -158,12 +154,7 @@ exports.queryPixabay = async (object = {}) => {
       console.log(`queryPixabay imageId: ${locationInfo.imageId}`);
       return locationInfo;
     }
-    if (!res.ok) {
-      // console.log(res.status);
-      // Todo: set default image
-    }
   } catch (error) {
-    // Todo: error handling
     console.error('the following error occured: ', error.message);
   }
   return null;
@@ -173,49 +164,33 @@ exports.queryPixabay = async (object = {}) => {
   Hotlinking of Pixabay images is not allowed. Therefore the image is downloaded.
   The following solution was adapted by Senthil Muthuvel
   (https://gist.github.com/senthilmpro/072f5e69bdef4baffc8442c7e696f4eb)
-  */
+*/
 exports.downloadFile = async (object = {}) => {
   const uri = object.largeImageURL;
   const { imageId } = object;
 
   const dirPath = path.join(`${process.cwd()}/dist`, '/cache', `${imageId}.jpg`);
 
-  // Todo: only download if the file is not cached
-  // fs.access(`${dirPath}/${imageId.id}.jpg`, fs.F_OK, (err) => {
-  //   if (!err) {
-  //     console.log('image already there');
-  //   }
-  //   if (err) {
-  //     console.log('image not there');
-  //   }
-  // });
-
-  // axios image download with response type "stream"
+  // axios image download is started.
   const response = await axios.get(uri, {
     responseType: 'stream',
   });
 
-  // pipe the result stream into a file on disc
+  // The result stream is written into a file.
   response.data.pipe(fs.createWriteStream(dirPath));
 
   return new Promise((resolve, reject) => {
     response.data.on('end', () => {
-      console.log(`locationInfo.forecastMonth.month DL ${logObject(locationInfo)}`);
-      console.log('resolved');
       resolve(locationInfo);
     });
 
     response.data.on('error', () => {
-      console.log('rejected');
       reject(locationInfo);
     });
   });
 };
 
-/*
-  Todo: adapt function for requirement If the trip is within a week, you will get the
-  current weather forecast. If the trip is in the future, you will get a predicted forecast.
-*/
+// The Weatherbit API is queried.
 exports.queryWeatherbit = async (object = {}) => {
   const apiKey = process.env.WEATHERBIT_API_KEY;
   let uri = '';
@@ -228,7 +203,7 @@ exports.queryWeatherbit = async (object = {}) => {
   if (object.daysUntilTrip > 15) {
     /*
       If the trip is later than 16 days the average weather data for the date is retrieved.
-      The date is adjusted to match the API's requirements.
+      The date is adjusted via slice() to match the API's requirements.
     */
     uri = `https://api.weatherbit.io/v2.0/normals?lat=${object.latitude}&lon=${object.longitude}&start_day=${object.date.slice(5)}&end_day=${object.date.slice(5)}&tp=monthly&key=${apiKey}`;
   }
@@ -261,7 +236,7 @@ exports.queryWeatherbit = async (object = {}) => {
           return dailyForecast;
         };
 
-        // Adding the dailyForecast object to locationInfo
+        // Adding the dailyForecast object to the locationInfo object.
         const getExtensiveForecast = () => {
           locationInfo.forecastDays = {};
           Object.assign(locationInfo, locationInfo.forecastDays);
@@ -273,6 +248,10 @@ exports.queryWeatherbit = async (object = {}) => {
         };
         getExtensiveForecast();
       }
+      /*
+        If the travel day is too far in the future historical weather data
+        is added to the locationInfo object.
+      */
       if (object.daysUntilTrip > 15) {
         locationInfo.forecastMonth = {};
         locationInfo.forecastMonth.month = response.data[0].month;
@@ -289,22 +268,18 @@ exports.queryWeatherbit = async (object = {}) => {
       return errorData;
     }
   } catch (error) {
-    // Todo: error handling
     console.error('the following error occured: ', error.message);
   }
   return locationInfo;
 };
 
 /*
-    The data for the client is accumulated. In the first step the latitude and longitude
-    values from the submitted city are retrieved from the Geonames API.
-  */
+  The GeoNames API is called to get latitude and longitude values for a user submitted location.
+*/
 exports.getGeoData = async (location, countryCode, date, daysUntilTrip) => {
-  // Todo: Weather API in distinct function. Start promise chain in this function.
-  // Geonames API options
   const userName = process.env.GEONAMES_USER;
   console.log('GeoNames API is called');
-  // The API call URI is composed.
+  // The URL is composed.
   const uri = `http://api.geonames.org/search?name_equals=${location}&country=${countryCode}&username=${userName}&type=json`;
   // Spaces are replaced with dashes for the URI
   const res = await fetch(encodeURI(uri.replace(/\s+/g, '-')));
@@ -315,7 +290,7 @@ exports.getGeoData = async (location, countryCode, date, daysUntilTrip) => {
       const response = await res.json();
       /*
         An array of different locations is returned. The first location is the
-        most suitable and therefore the needed data retrieved.
+        most suitable and therefore the needed data added to the locationInfo object.
       */
       locationInfo = {
         city: response.geonames[0].name,
@@ -327,20 +302,8 @@ exports.getGeoData = async (location, countryCode, date, daysUntilTrip) => {
       };
       return locationInfo;
     }
-    /*
-      In any other case an error message is displayed to the user.
-      The error message is retrieved from the API to provide a meaningful
-      error message to the user.
-    */
-    if (!res.ok) {
-      const errorData = await res.json();
-      return errorData;
-    }
   } catch (error) {
-    // Todo: Message to UI
     console.error('the following error occured: ', error.message);
   }
-
-  // Todo: get the final value of locationInfo
   return null;
 };

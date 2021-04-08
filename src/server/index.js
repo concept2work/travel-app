@@ -1,4 +1,4 @@
-// Dotenv is used to read values from the .env file
+// Dotenv is used to read values from the .env file.
 const dotenv = require('dotenv');
 
 // Express is used to run server and routes.
@@ -13,43 +13,27 @@ const countries = require('i18n-iso-countries');
 // An instance of app is started.
 const app = express();
 
+// File system specific modules.
 const fs = require('fs');
-
 const path = require('path');
 
-/*
-  Middleware to process timeouts
-*/
+// Middleware to process timeouts
 const timeout = require('connect-timeout');
 
+// Module to query the APIs.
 const queryService = require('./js/queryServices.js');
 
-// Library that allows the use of environment variables
+// Library that allows the use of environment variables.
 dotenv.config();
 
-/*
-  Static resources from node_modules are referenced to make them available
-  for index.html and app.js
-*/
-
-/*
-  open-weather-icons provide a font that refer to the icon ID that is provided by the
-  Open Weather API. This way the matching icon can be easily displayed.
-*/
-app.use('/open-weather-icons', express.static(`${__dirname}/node_modules/open-weather-icons/dist/`));
-
-/*
-  Creating dist folder if it does not exist yet.
-*/
+// Creating dist folder if it does not exist yet.
 const distPath = path.join(`${process.cwd()}`, '/dist');
 // If the folder does not exist yet, it gets created.
 if (!fs.existsSync(distPath)) {
   fs.mkdirSync(distPath);
 }
 
-/*
-  Creating a cache folder for downloads from Pixabay.
-*/
+// Creating a cache folder for downloads from Pixabay.
 const dirPath = path.join(`${process.cwd()}/dist`, '/cache');
 // If the folder does not exist yet, it gets created.
 if (!fs.existsSync(dirPath)) {
@@ -58,20 +42,12 @@ if (!fs.existsSync(dirPath)) {
 
 /*
   Setting a timeout of 120 seconds (server standard time) for feedback
-  purposes in specific routes.
+  purposes.
 */
 const serverTimeOut = '120s';
 
-/*
-  Empty JS objects act as endpoints for the routes regarding request and response data
-  to/from the server.
-*/
-const requestData = {};
-const responseData = {};
-
-/* An empty JS object acts as endpoint for the routes regarding the user and weather data */
+// An empty JS object acts as endpoint for the routes.
 let projectData = {};
-const locationInfo = {};
 
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
@@ -102,8 +78,6 @@ app.listen(getPort(), () => {
   console.log(`server is running on localhost:${getPort()}`);
 });
 
-// The server routes are defined.
-
 // In development mode the server redirects to to the frontend.
 app.get('/', (req, res, next) => {
   if (process.env.NODE_ENV === 'development') {
@@ -112,10 +86,7 @@ app.get('/', (req, res, next) => {
   next();
 });
 
-/*
-  When weather information is received on the postWeather route
-  the projectData object is updated with that information.
-*/
+// The user input is processed and the APIs are queried.
 const processUserInput = async (req, res) => {
   console.log(`daysUntilTrip: ${req.body.daysUntilTrip}`);
   // Date from date picker is formatted
@@ -153,12 +124,16 @@ const processUserInput = async (req, res) => {
 };
 app.post('/api/postUserSelection', processUserInput);
 
-// The getCountries exposes an object consisting of country codes and their respective names.
+// getCountries exposes an object consisting of country codes and their respective names.
 const getCountries = (req, res) => {
   res.send(countries.getNames('en', { select: 'official' }));
 };
 app.get('/api/getCountries', getCountries);
 
+/*
+  Route to query Pixabay for a random image which is used on the
+  home page if no city is queried yet.
+*/
 const homePageImage = async (req, res) => {
   const image = {
     topic: 'city travel',
