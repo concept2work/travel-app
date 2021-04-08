@@ -226,7 +226,10 @@ exports.queryWeatherbit = async (object = {}) => {
   }
 
   if (object.daysUntilTrip > 16) {
-    // If the trip is later than 16 days the average weather data for the date is retrieved.
+    /*
+      If the trip is later than 16 days the average weather data for the date is retrieved.
+      The date is adjusted to match the API's requirements.
+    */
     uri = `https://api.weatherbit.io/v2.0/normals?lat=${object.latitude}&lon=${object.longitude}&start_day=${object.date.slice(5)}&end_day=${object.date.slice(5)}&tp=monthly&key=${apiKey}`;
   }
 
