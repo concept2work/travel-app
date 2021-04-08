@@ -160,3 +160,78 @@ textarea {
 #overview-content span:last-child::after{
   content: "";
 }
+
+/* 
+  Custom datepicker styles
+*/
+.qs-square {
+  &:not(.qs-empty):not(.qs-disabled):not(.qs-day):not(.qs-active) {
+    &:hover {
+      background: $primary;
+    }
+  }
+}
+
+.qs-day {
+  color: $dark-gray;
+}
+
+.qs-datepicker-container {
+  border: 1px solid $dark-gray;
+}
+
+.qs-submit {
+  border: 1px solid white;
+
+  &.qs-disabled {
+    color: $dark-gray;
+    border-color: $dark-gray;
+  }
+}
+
+.qs-controls {
+  background: $light-gray;
+}
+
+.qs-arrow {
+
+  &:hover {
+    &.qs-left:after {
+      border-right-color: $dark;
+    }
+
+    &.qs-right:after {
+      border-left-color: $dark;
+    }
+  }
+
+  &.qs-left:after {
+    border-right-color: $dark-gray;
+  }
+
+  &.qs-right:after {
+    border-left-color: $dark-gray;
+  }
+}
+
+.qs-month-year {
+
+  &:hover {
+    border-bottom: 1px solid $dark-gray;
+  }
+
+}
+
+.qs-event {
+  position: relative;
+
+  &:after {
+    background: $info;
+  }
+}
+
+.qs-active,
+.qs-range-start,
+.qs-range-end {
+  background: $light-blue;
+}
