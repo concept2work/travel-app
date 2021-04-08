@@ -129,16 +129,11 @@ const submitInfo = (event) => {
   });
 };
 
-/*
-  Event listener that checks if the Enter button is used to confirm input.
-  The input is validated, if the zip is valid the Weather API is queried.
-*/
-document.getElementById('city').addEventListener('keypress', (event) => {
+const submitByKeypress = (event) => {
   if (event.key === 'Enter') {
-    console.log('Enter pressed.');
     submitInfo(event);
   }
-});
+};
 
 // The selected country is read.
 const inputCountry = () => {
@@ -196,5 +191,6 @@ window.addEventListener('load', () => {
     });
 });
 
-export { submitInfo };
 export { inputCountry };
+export { submitInfo };
+export { submitByKeypress };
