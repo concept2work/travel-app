@@ -140,7 +140,13 @@ const processUserInput = async (req, res) => {
     .then((response) => res.send(response))
     .catch((error) => {
       console.error('the following error occured: ', error.message);
-      return res.send({ error: 'There was an internal server error.' });
+      if (error.message === "Cannot read property 'daysUntilTrip' of null") {
+        return res.send({
+          error: 'City was not found.',
+        });
+      } return res.send({
+        error: 'There was an internal server error.',
+      });
     });
 };
 app.post('/api/postUserSelection', processUserInput);
