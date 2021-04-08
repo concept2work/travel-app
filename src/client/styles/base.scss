@@ -1,8 +1,8 @@
 @import "variables";
 @import "fonts";
-@import "~bootstrap/scss/bootstrap";
 @import "header";
 @import "footer";
+@import "~bootstrap/scss/bootstrap";
 @import "~weather-icons-sass/sass/weather-icons-variables";
 @import "~weather-icons-sass/sass/weather-icons-core";
 @import "~weather-icons-sass/sass/weather-icons-classes";
@@ -165,11 +165,13 @@ textarea {
   Custom datepicker styles
 */
 .qs-square {
+
   &:not(.qs-empty):not(.qs-disabled):not(.qs-day):not(.qs-active) {
     &:hover {
       background: $primary;
     }
   }
+
 }
 
 .qs-day {
@@ -181,12 +183,12 @@ textarea {
 }
 
 .qs-submit {
-  border: 1px solid white;
 
   &.qs-disabled {
     color: $dark-gray;
     border-color: $dark-gray;
   }
+
 }
 
 .qs-controls {
@@ -212,6 +214,7 @@ textarea {
   &.qs-right:after {
     border-left-color: $dark-gray;
   }
+
 }
 
 .qs-month-year {
@@ -228,6 +231,7 @@ textarea {
   &:after {
     background: $info;
   }
+
 }
 
 .qs-active,
