@@ -44,11 +44,13 @@ const weatherIcons = {
   900: 'wi-na',
 };
 
+// The error message is shown by removing the CSS class "d-none".
 const showErrorMessage = (error) => {
   document.getElementById('error').classList.remove('d-none');
   document.getElementById('error-message').innerHTML = `Error: ${error}`;
 };
 
+// The error message is hidden via the CSS class "d-none".
 const removeErrorMessage = () => {
   document.getElementById('error').classList.add('d-none');
 };
@@ -58,9 +60,7 @@ const showSpinner = () => {
   document.getElementById('loading-status').className = 'd-flex justify-content-center mt-5';
 };
 
-/*
-  The function removes a previously invoked loading spinner.
-*/
+// The function removes a previously invoked loading spinner.
 const removeSpinner = () => {
   document.getElementById('loading-status').className = 'd-none';
 };
@@ -78,7 +78,7 @@ const resetView = (elementId) => {
 };
 
 const updateUI = async (object = {}) => {
-  // Display the days until the trip starts.
+  // Displaying the days until the trip starts.
   const showDaysUntilTripMessage = () => {
     if (object.daysUntilTrip === 0) {
       return 'Your trip is today. Better start packing.';
@@ -96,14 +96,12 @@ const updateUI = async (object = {}) => {
   const showWeatherData = () => {
     if (object.daysUntilTrip < 16) {
       /*
-        Display the weather forecast. The maximum of days that can be retrieved via the API is 16,
-        in the array that is 0-15.
+        Displaying the weather forecast. The maximum of days that can be retrieved via
+        the API is 16, in the array that is 0-15.
       */
       resetView('weather-forecast');
       for (let i = object.daysUntilTrip; i < 16; i += 1) {
         const weatherList = document.getElementById('weather-forecast');
-        // Todo: check that date is not in the past.
-        console.log(object.forecastDays[i].date);
         const date = new Date(object.forecastDays[i].date);
         const weatherInfo = `
       <li class="list-group-item">
@@ -152,15 +150,14 @@ const updateUI = async (object = {}) => {
   document.getElementById('tab-item-overview').classList.add('show');
   document.getElementById('nav-item-overview').classList.remove('d-none');
 
-  // If an abtract, i.e. facts about a city, it gets displayed.
+  // If an abstract is present, i.e. facts about a city, it gets displayed.
   if (object.abstract) {
-    // Previously shown facts are removed.
-    // resetView('overview-content');
     const locationOverview = document.getElementById('locationOverview');
     if (locationOverview) {
       locationOverview.parentNode.removeChild(locationOverview);
     }
 
+    // The locationOverview card is created to present the retrieved data.
     const accordionTripOverview = document.getElementById('accordionTripOverview');
     const accordionTripOverviewContent = `
     <div class="card" id="locationOverview">
@@ -227,6 +224,7 @@ const updateUI = async (object = {}) => {
   // The loading spinner is removed.
   removeSpinner();
 
+  // The retrieved object is shown in the console.
   console.log(object);
 };
 

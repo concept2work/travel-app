@@ -148,7 +148,11 @@ const inputCountry = () => {
 
 // When the page is loaded the content gets updated.
 window.addEventListener('load', () => {
-  // Datepicker is added. When the page is loaded the current date is set in the date input field.
+  /*
+    Datepicker is added. When the page is loaded the current date is set in
+    the date input field. Via minDate: getToday() it is prevented for the
+    user to select a date in the past.
+  */
   const tripDate = datepicker('#trip-date', {
     minDate: getToday(),
     dateSelected: getToday(),
