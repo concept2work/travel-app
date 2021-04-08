@@ -103,7 +103,6 @@ const postUserSelection = async () => {
 
 const submitInfo = (event) => {
   // If a result is already shown the view gets reset.
-  // updateIndex.resetView();
   const forms = document.getElementsByClassName('needs-validation');
   Array.prototype.filter.call(forms, (form) => {
     // const apiRequestUrl = document.getElementById('url-input').value;
@@ -146,6 +145,7 @@ document.getElementById('city').addEventListener('keypress', (event) => {
   }
 });
 
+// The selected country is read.
 const inputCountry = () => {
   selectedCountryCode = document.getElementById('country').value;
   console.log(selectedCountryCode);
@@ -166,8 +166,10 @@ window.addEventListener('load', () => {
   // Home link to logo is set.
   document.getElementById('home-link').setAttribute('href', queryLocalServer('/'));
 
+  // The overview tab is hidden.
   document.getElementById('nav-item-overview').classList.add('d-none');
-  // document.getElementById('nav-item-trip').classList.add('d-none');
+
+  // The home page image is set: a random city image provided via Pixabay.
   let image = '';
   const getHomePageImage = async () => {
     const res = await fetch(queryLocalServer('/api/getHomePageImage'));
