@@ -175,7 +175,7 @@ window.addEventListener('load', () => {
     const res = await fetch(queryLocalServer('/api/getHomePageImage'));
     try {
       image = await res.json();
-      console.log(`home page image id: ${image.imageId}`);
+      // console.log(`home page image id: ${image.imageId}`);
       return image;
     } catch (error) {
       console.error('the following error occured: ', error.message);
@@ -186,6 +186,9 @@ window.addEventListener('load', () => {
     .then((result) => {
       if (result.imageId) {
         document.getElementById('hero').style.backgroundImage = `url("./dist/cache/${result.imageId}.jpg")`;
+      } else {
+        showErrorMessage(result.error);
+        document.getElementById('hero').style.backgroundImage = '';
       }
     });
 });

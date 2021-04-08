@@ -60,7 +60,7 @@ if (!fs.existsSync(dirPath)) {
   Setting a timeout of 120 seconds (server standard time) for feedback
   purposes in specific routes.
 */
-const serverTimeOut = '240s';
+const serverTimeOut = '120s';
 
 /*
   Empty JS objects act as endpoints for the routes regarding request and response data
@@ -168,3 +168,19 @@ const homePageImage = async (req, res) => {
     .then((response) => res.send(response));
 };
 app.get('/api/getHomePageImage', homePageImage);
+
+// Error handling
+app.use((err, req, res, next) => {
+  if (res.status(504)) {
+    /*
+      Workaround to reset timeout adapted from Marcos Casagrande and Arup Rakshit
+      (https://stackoverflow.com/questions/55364401/express-js-connect-timeout-vs-server-timeout)
+    */
+    req.socket.removeAllListeners('timeout');
+    // Sending a timeout specific error message to the client
+    res.send({
+      error: 'There was a server time out. Please try again later.',
+    });
+  }
+  next();
+});
