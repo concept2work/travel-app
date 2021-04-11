@@ -31,30 +31,33 @@ exports.queryDbPedia = async (type, object = {}) => {
   const { city } = object;
   const cityDbResource = city.replace(/ /g, '_');
   const fetcher = new SparqlEndpointFetcher();
+  const longLess = parseFloat(longitude) - 0.25;
+  const longMore = parseFloat(longitude) + 0.25;
+  const latLess = parseFloat(latitude) - 0.25;
+  const latMore = parseFloat(latitude) + 0.25;
   let sparqlQuery;
 
-  /*
-    SPARQL intersects filter adapted from UninformedUser
-    (https://stackoverflow.com/questions/47926694/use-sparql-and-dbpedia-to-query-for-cities-within-a-given-radius-based-on-long-a)
-  */
   if (type === 'cityInfo') {
     sparqlQuery = `
       PREFIX : <http://dbpedia.org/resource/>
       SELECT DISTINCT ?place ?abstract ?area ?population ?comment
       WHERE {
         VALUES ?cityType { schema:City wikidata:Q486972 dbo:City } 
-        ?place geo:lat ?lat.
-        ?place geo:long ?long.
-        ?place rdf:type ?cityType.
-        ?place rdfs:label ?label.
-        ?place dbo:abstract ?abstract.
+        ?place geo:lat ?lat .
+        ?place geo:long ?long .
+        ?place rdf:type ?cityType .
+        ?place rdfs:label ?label .
+        ?place dbo:abstract ?abstract .
         OPTIONAL {?place dbo:areaTotal ?area}
         OPTIONAL {?place dbo:populationTotal ?population}
         OPTIONAL {?place rdfs:comment ?comment}
-        FILTER ( bif:st_intersects( bif:st_point (?long, ?lat), bif:st_point (${longitude}, ${latitude}), 5))
+        FILTER (?lat <= "${latMore}"^^xsd:float)
+        FILTER (?lat >= "${latLess}"^^xsd:float)
+        FILTER (?long <= "${longMore}"^^xsd:float)
+        FILTER (?long >= "${longLess}"^^xsd:float)
         FILTER (lang(?abstract) = 'en' and lang(?label) = 'en')
-        FILTER (?place = :${cityDbResource})
-      } LIMIT 1`;
+        FILTER contains(?label,"${city}")
+      } ORDER BY DESC(?population) LIMIT 1`;
   }
 
   try {
