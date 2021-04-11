@@ -34,17 +34,22 @@ if (!fs.existsSync(distPath)) {
 }
 
 // Creating a cache folder for downloads from Pixabay.
-const dirPath = path.join(`${process.cwd()}/dist`, '/cache');
+const cachePath = path.join(`${process.cwd()}/dist`, '/cache');
 // If the folder does not exist yet, it gets created.
-if (!fs.existsSync(dirPath)) {
-  fs.mkdirSync(dirPath);
+if (!fs.existsSync(cachePath)) {
+  fs.mkdirSync(cachePath);
 }
 
+// A fallback home page image is copied to the dist path
+fs.copyFile(path.join(`${process.cwd()}`, '/src/client/media/img/smart-vagabond-background-default.jpg'), `${cachePath}/smart-vagabond-background-default.jpg`, (err) => {
+  if (err) throw err;
+});
+
 /*
-  Setting a timeout of 120 seconds (server standard time) for feedback
+  Setting a timeout of 30 seconds for feedback
   purposes.
 */
-const serverTimeOut = '120s';
+const serverTimeOut = '30s';
 
 // An empty JS object acts as endpoint for the routes.
 let projectData = {};
@@ -99,14 +104,18 @@ const processUserInput = async (req, res) => {
     daysUntilTrip: req.body.daysUntilTrip,
   };
   await queryService.getGeoData(
-    projectData.city, projectData.countryCode, projectData.date, projectData.daysUntilTrip,
+    process.env.GEONAMES_USER,
+    projectData.city,
+    projectData.countryCode,
+    projectData.date,
+    projectData.daysUntilTrip,
   )
     .catch()
-    .then((response) => queryService.queryWeatherbit(response))
+    .then((response) => queryService.queryWeatherbit(process.env.WEATHERBIT_API_KEY, response))
     .catch()
     .then((response) => queryService.queryDbPedia(response))
     .catch()
-    .then((response) => queryService.queryPixabay(response))
+    .then((response) => queryService.queryPixabay(process.env.PIXABAY_API_KEY, response))
     .catch()
     .then((response) => queryService.downloadFile(response))
     .catch()
@@ -138,8 +147,15 @@ const homePageImage = async (req, res) => {
   const image = {
     topic: 'city travel',
   };
-  queryService.queryPixabay(image)
-    .then((response) => queryService.downloadFile(response))
+  queryService.queryPixabay(process.env.PIXABAY_API_KEY, image)
+    .then(
+      (response) => queryService.downloadFile(response),
+    )
+    .catch(
+      (error) => {
+        console.error('the following error occured: ', error.message);
+      },
+    )
     .then((response) => res.send(response));
 };
 app.get('/api/getHomePageImage', homePageImage);
