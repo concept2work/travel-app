@@ -35,6 +35,23 @@ exports.queryDbPedia = async (object = {}) => {
   const latLess = parseFloat(latitude) - 0.25;
   const latMore = parseFloat(latitude) + 0.25;
   const fetcher = new SparqlEndpointFetcher();
+  /*
+    Todo: Update query:
+
+    SELECT DISTINCT * {
+      ?city rdfs:label ?label.
+      ?city a dbo:City ;
+        geo:lat ?lat ;
+        geo:long ?long .
+      ?city dbo:abstract ?abstract.
+      FILTER ( bif:st_intersects( bif:st_point (?long, ?lat), bif:st_point (-74.00597, 40.71427), 10))
+      FILTER (lang(?abstract) = 'en' and lang(?label) = 'en')
+      FILTER contains(?label,"New York")
+    } LIMIT 1
+
+    https://dbpedia.org/snorql/
+    https://stackoverflow.com/questions/47926694/use-sparql-and-dbpedia-to-query-for-cities-within-a-given-radius-based-on-long-a
+  */
   const sparqlQuery = (queryType, queryTypeSuffix, queryLimit) => `
   PREFIX : <http://dbpedia.org/resource/>
   ${queryType} ${queryTypeSuffix}
@@ -91,8 +108,9 @@ exports.queryDbPedia = async (object = {}) => {
   Pixabay is queried two times: firstly for getting a home page image, and secondly if the
   user searches for a city. Therefore the queried URLs vary.
 */
-exports.queryPixabay = async (object = {}) => {
-  const apiKey = process.env.PIXABAY_API_KEY;
+exports.queryPixabay = async (apiKey, object = {}) => {
+  console.log(`object.city ${object.city}`);
+  console.log(`object.countryName: ${object.countryName}`);
   let uri;
 
   // General query with one key/value from passed object
@@ -154,6 +172,18 @@ exports.queryPixabay = async (object = {}) => {
       console.log(`queryPixabay imageId: ${locationInfo.imageId}`);
       return locationInfo;
     }
+    if (!res.ok) {
+      // Fallback image is set, if Pixabay request is not successful.
+      locationInfo.imageId = 'smart-vagabond-background-default';
+      // Path is set since downloadFile() needs one.
+      if (process.env.NODE_ENV === 'development') {
+        locationInfo.largeImageURL = `http://localhost:${process.env.PORT_DEV_FRONTEND}/dist/cache/smart-vagabond-background-default.jpg`;
+      }
+      if (process.env.NODE_ENV === 'production') {
+        locationInfo.largeImageURL = `http://localhost:${process.env.PORT_PROD}/cache/smart-vagabond-background-default.jpg`;
+      }
+      return locationInfo;
+    }
   } catch (error) {
     console.error('the following error occured: ', error.message);
   }
@@ -191,8 +221,7 @@ exports.downloadFile = async (object = {}) => {
 };
 
 // The Weatherbit API is queried.
-exports.queryWeatherbit = async (object = {}) => {
-  const apiKey = process.env.WEATHERBIT_API_KEY;
+exports.queryWeatherbit = async (apiKey, object = {}) => {
   let uri = '';
 
   if (object.daysUntilTrip <= 15) {
@@ -273,14 +302,11 @@ exports.queryWeatherbit = async (object = {}) => {
   return locationInfo;
 };
 
-/*
-  The GeoNames API is called to get latitude and longitude values for a user submitted location.
-*/
-exports.getGeoData = async (location, countryCode, date, daysUntilTrip) => {
-  const userName = process.env.GEONAMES_USER;
+// The GeoNames API is called to get latitude and longitude values for a user submitted location.
+exports.getGeoData = async (apiKey, location, countryCode, date, daysUntilTrip) => {
   console.log('GeoNames API is called');
   // The URL is composed.
-  const uri = `http://api.geonames.org/search?name_equals=${location}&country=${countryCode}&username=${userName}&type=json`;
+  const uri = `http://api.geonames.org/search?name_equals=${location}&country=${countryCode}&username=${apiKey}&type=json`;
   // Spaces are replaced with dashes for the URI
   const res = await fetch(encodeURI(uri.replace(/\s+/g, '-')));
   console.log(`get Info from GeoNames API: ${uri}`);
