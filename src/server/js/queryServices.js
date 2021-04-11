@@ -55,9 +55,9 @@ exports.queryDbPedia = async (type, object = {}) => {
         FILTER (?long >= "${longLess}"^^xsd:float)
         FILTER (lang(?abstract) = 'en' and lang(?label) = 'en')
         FILTER STRSTARTS(?label,"${city}")
-      } LIMIT 1`;
+      } ORDER BY DESC(?population) LIMIT 1`;
   }
-
+  console.log(sparqlQuery);
   try {
     const data = await fetcher.fetchBindings('https://dbpedia.org/sparql', sparqlQuery);
     data.on('data', (bindings) => {
