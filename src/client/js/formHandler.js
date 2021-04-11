@@ -61,7 +61,7 @@ const getDaysUntilTrip = (date) => {
   return (Math.floor(((tripDate - getToday().getTime()) / (1000 * 60 * 60 * 24)) + 1));
 };
 
-const getInput = () => {
+const getInput = async () => {
   const userInput = {
     city: document.getElementById('city').value,
     countryCode: selectedCountryCode,
@@ -72,14 +72,14 @@ const getInput = () => {
 };
 
 // The user input is sent to the server. On the server side the APIs are queried.
-const postUserSelection = async () => {
+const postUserSelection = async (object = {}) => {
   const settings = {
     method: 'POST',
     credentials: 'same-origin',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(getInput()),
+    body: JSON.stringify(object),
   };
   try {
     const fetchResponse = await fetch(queryLocalServer('/api/postUserSelection'), settings);
@@ -110,7 +110,8 @@ const submitInfo = (event) => {
       // The spinner is shown to feedback the loading process.
       removeErrorMessage();
       showSpinner();
-      postUserSelection()
+      getInput()
+        .then((response) => postUserSelection(response))
         .then(
           // After getting a response from the server the data is processed.
           (response) => {
@@ -164,29 +165,26 @@ window.addEventListener('load', () => {
   document.getElementById('nav-item-overview').classList.add('d-none');
 
   // The home page image is set: a random city image provided via Pixabay.
-  let image = '';
+
   const getHomePageImage = async () => {
     const res = await fetch(queryLocalServer('/api/getHomePageImage'));
+    let image = {};
     try {
       image = await res.json();
       return image;
     } catch (error) {
       console.error('the following error occured: ', error.message);
+      image.imageId = 'smart-vagabond-background-default';
+      return image;
     }
-    return null;
   };
   getHomePageImage()
     .then((result) => {
-      if (result.imageId) {
-        if (process.env.NODE_ENV === 'production') {
-          document.getElementById('hero').style.backgroundImage = `url("./cache/${result.imageId}.jpg")`;
-        }
-        if (process.env.NODE_ENV === 'development') {
-          document.getElementById('hero').style.backgroundImage = `url("./dist/cache/${result.imageId}.jpg")`;
-        }
-      } else {
-        showErrorMessage(result.error);
-        document.getElementById('hero').style.backgroundImage = '';
+      if (process.env.NODE_ENV === 'production') {
+        document.getElementById('hero').style.backgroundImage = `url("./cache/${result.imageId}.jpg")`;
+      }
+      if (process.env.NODE_ENV === 'development') {
+        document.getElementById('hero').style.backgroundImage = `url("./dist/cache/${result.imageId}.jpg")`;
       }
     });
 });
@@ -194,3 +192,5 @@ window.addEventListener('load', () => {
 export { inputCountry };
 export { submitInfo };
 export { submitByKeypress };
+export { getDaysUntilTrip };
+export { postUserSelection };
