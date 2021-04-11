@@ -113,7 +113,7 @@ const processUserInput = async (req, res) => {
     .catch()
     .then((response) => queryService.queryWeatherbit(process.env.WEATHERBIT_API_KEY, response))
     .catch()
-    .then((response) => queryService.queryDbPedia(response))
+    .then((response) => queryService.queryDbPedia('cityInfo', response))
     .catch()
     .then((response) => queryService.queryPixabay(process.env.PIXABAY_API_KEY, response))
     .catch()
