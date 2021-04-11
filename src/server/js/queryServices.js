@@ -25,58 +25,40 @@ let locationInfo = {
   the values in DBpedia. Therefore a range is set via various FILTER settings in the
   SPARQL query.
 */
-exports.queryDbPedia = async (object = {}) => {
+exports.queryDbPedia = async (type, object = {}) => {
   const { longitude } = object;
   const { latitude } = object;
   const { city } = object;
   const cityDbResource = city.replace(/ /g, '_');
-  const longLess = parseFloat(longitude) - 0.25;
-  const longMore = parseFloat(longitude) + 0.25;
-  const latLess = parseFloat(latitude) - 0.25;
-  const latMore = parseFloat(latitude) + 0.25;
   const fetcher = new SparqlEndpointFetcher();
+  let sparqlQuery;
+
   /*
-    Todo: Update query:
-
-    SELECT DISTINCT * {
-      ?city rdfs:label ?label.
-      ?city a dbo:City ;
-        geo:lat ?lat ;
-        geo:long ?long .
-      ?city dbo:abstract ?abstract.
-      FILTER ( bif:st_intersects( bif:st_point (?long, ?lat), bif:st_point (-74.00597, 40.71427), 10))
-      FILTER (lang(?abstract) = 'en' and lang(?label) = 'en')
-      FILTER contains(?label,"New York")
-    } LIMIT 1
-
-    https://dbpedia.org/snorql/
-    https://stackoverflow.com/questions/47926694/use-sparql-and-dbpedia-to-query-for-cities-within-a-given-radius-based-on-long-a
+    SPARQL intersects filter adapted from UninformedUser
+    (https://stackoverflow.com/questions/47926694/use-sparql-and-dbpedia-to-query-for-cities-within-a-given-radius-based-on-long-a)
   */
-  const sparqlQuery = (queryType, queryTypeSuffix, queryLimit) => `
-  PREFIX : <http://dbpedia.org/resource/>
-  ${queryType} ${queryTypeSuffix}
-  WHERE {
-    VALUES ?cityType { schema:City wikidata:Q486972 dbo:City } 
-    ?place geo:lat ?lat.
-    ?place geo:long ?long.
-    ?place rdf:type ?cityType.
-    ?place rdfs:label ?label.
-    ?place dbo:abstract ?abstract.
-    OPTIONAL {?place dbo:areaTotal ?area}
-    OPTIONAL {?place dbo:populationTotal ?population}
-    OPTIONAL {?place rdfs:comment ?comment}
-    FILTER (?lat <= "${latMore}"^^xsd:float)
-    FILTER (?lat >= "${latLess}"^^xsd:float)
-    FILTER (?long <= "${longMore}"^^xsd:float)
-    FILTER (?long >= "${longLess}"^^xsd:float)
-    FILTER (lang(?abstract) = 'en' and lang(?label) = 'en' and lang(?comment) = 'en')
-    FILTER (?place = :${cityDbResource})
-  } ${queryLimit}`;
-  console.log(`sparqlQuery: ${sparqlQuery}`);
+  if (type === 'cityInfo') {
+    sparqlQuery = `
+      PREFIX : <http://dbpedia.org/resource/>
+      SELECT DISTINCT ?place ?abstract ?area ?population ?comment
+      WHERE {
+        VALUES ?cityType { schema:City wikidata:Q486972 dbo:City } 
+        ?place geo:lat ?lat.
+        ?place geo:long ?long.
+        ?place rdf:type ?cityType.
+        ?place rdfs:label ?label.
+        ?place dbo:abstract ?abstract.
+        OPTIONAL {?place dbo:areaTotal ?area}
+        OPTIONAL {?place dbo:populationTotal ?population}
+        OPTIONAL {?place rdfs:comment ?comment}
+        FILTER ( bif:st_intersects( bif:st_point (?long, ?lat), bif:st_point (${longitude}, ${latitude}), 5))
+        FILTER (lang(?abstract) = 'en' and lang(?label) = 'en')
+        FILTER (?place = :${cityDbResource})
+      } LIMIT 1`;
+  }
+
   try {
-    const data = await fetcher.fetchBindings('https://dbpedia.org/sparql', sparqlQuery(
-      'SELECT DISTINCT', '?place ?abstract ?area ?population ?comment', 'LIMIT 1',
-    ));
+    const data = await fetcher.fetchBindings('https://dbpedia.org/sparql', sparqlQuery);
     data.on('data', (bindings) => {
       locationInfo.abstract = bindings.abstract.value;
       /*
