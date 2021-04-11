@@ -49,14 +49,13 @@ exports.queryDbPedia = async (type, object = {}) => {
         ?place dbo:abstract ?abstract .
         OPTIONAL {?place dbo:areaTotal ?area}
         OPTIONAL {?place dbo:populationTotal ?population}
-        OPTIONAL {?place rdfs:comment ?comment}
         FILTER (?lat <= "${latMore}"^^xsd:float)
         FILTER (?lat >= "${latLess}"^^xsd:float)
         FILTER (?long <= "${longMore}"^^xsd:float)
         FILTER (?long >= "${longLess}"^^xsd:float)
         FILTER (lang(?abstract) = 'en' and lang(?label) = 'en')
-        FILTER contains(?label,"${city}")
-      } ORDER BY DESC(?population) LIMIT 1`;
+        FILTER STRSTARTS(?label,"${city}")
+      } LIMIT 1`;
   }
 
   try {
@@ -68,17 +67,11 @@ exports.queryDbPedia = async (type, object = {}) => {
         This way CSS styling can be carried out via the client.
       */
       locationInfo.abstractParsed = nlp(bindings.abstract.value).sentences().data();
-      if (bindings.comment) {
-        locationInfo.comment = bindings.comment.value;
-      }
       if (bindings.area) {
         locationInfo.area = bindings.area.value;
       }
       if (bindings.population) {
         locationInfo.population = bindings.population.value;
-      }
-      if (bindings.wikiPageId) {
-        locationInfo.wikiPageId = bindings.wikiPageId.value;
       }
     });
     return locationInfo;
