@@ -36,7 +36,7 @@ PORT_DEV_FRONTEND=8080
 PORT_DEV_BACKEND=8081
 PORT_PROD=5000
 ````
-In development mode `PORT_DEV_BACKEND` specifies the server's port, while `PORT_DEV_FRONTEND` specifiys a different port for the app's frontend since [DevServer](https://webpack.js.org/configuration/dev-server/) with [Hot Module Replacement](https://webpack.js.org/concepts/hot-module-replacement/) is used and therefore client and server must be located on different addresses. `PORT_PROD` specifies the production mode port. It is possible to change these values.
+In development mode `PORT_DEV_BACKEND` specifies the server's port, while `PORT_DEV_FRONTEND` specifies a different port for the app's frontend since [DevServer](https://webpack.js.org/configuration/dev-server/) with [Hot Module Replacement](https://webpack.js.org/concepts/hot-module-replacement/) is used and therefore client and server must have different addresses. `PORT_PROD` specifies the production mode port. It is possible to change these values.
 
 ### Production mode
 In production mode it is only necessary to start via:
