@@ -29,7 +29,6 @@ exports.queryDbPedia = async (type, object = {}) => {
   const { longitude } = object;
   const { latitude } = object;
   const { city } = object;
-  const cityDbResource = city.replace(/ /g, '_');
   const fetcher = new SparqlEndpointFetcher();
   const longLess = parseFloat(longitude) - 0.25;
   const longMore = parseFloat(longitude) + 0.25;
