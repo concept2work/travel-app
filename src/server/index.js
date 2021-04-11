@@ -46,10 +46,10 @@ fs.copyFile(path.join(`${process.cwd()}`, '/src/client/media/img/smart-vagabond-
 });
 
 /*
-  Setting a timeout of 30 seconds for feedback
+  Setting a timeout of 60 seconds for feedback
   purposes.
 */
-const serverTimeOut = '30s';
+const serverTimeOut = '60s';
 
 // An empty JS object acts as endpoint for the routes.
 let projectData = {};
