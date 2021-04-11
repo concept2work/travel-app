@@ -51,10 +51,10 @@ You can open the application on localhost with your specified `PORT_PROD`, e. g.
 ### Development mode
 It is necessary to start the express server for the backend and furthermore build the webpack bundle for the frontend. Use the following commands to do so:
 ````
-npm run dev
-````
-In a second terminal window type:
-````
 npm run start
+````
+After success type in a second terminal window:
+````
+npm run dev
 ````
 You can open the application on localhost with your specified `PORT_DEV_FRONTEND`, e. g. [localhost:8080](http://localhost:8080).
